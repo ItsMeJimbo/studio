@@ -123,7 +123,7 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
         </DialogHeader>
         
         {/* Wrapper div to handle flex sizing and provide a constrained context for ScrollArea */}
-        <div className="flex-1 mt-4 relative overflow-hidden">
+        <div className="flex-1 mt-4 relative"> {/* Removed overflow-hidden from this intermediate div */}
           <ScrollArea className="absolute inset-0">
             {/* Added some padding to the Accordion itself if its content might touch the edges / scrollbar */}
             <Accordion type="single" collapsible className="w-full space-y-3 p-2">

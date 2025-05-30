@@ -36,7 +36,7 @@ export default function PrayersDialog({ isOpen, onOpenChange }: PrayersDialogPro
             Prayers
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            A collection of prayers to aid your reflection and spiritual practice.
+            The Act of Contrition to aid your reflection.
           </DialogDescription>
         </DialogHeader>
         
