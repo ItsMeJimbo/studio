@@ -33,15 +33,15 @@ export default function MySinsSection({ sins, onClearSins, onRemoveSin }: MySins
         <CardTitle className="text-2xl">My Sins</CardTitle>
         <CardDescription>This is your current list for reflection.</CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent className="flex-grow p-6"> {/* Adjusted padding */}
         {sins.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center text-muted-foreground p-8 border border-dashed rounded-md">
-            <ListX className="h-12 w-12 mb-4" />
-            <p className="text-lg font-medium">Your list is empty.</p>
-            <p>Select sins from the left or add custom ones to begin your reflection.</p>
+            <ListX className="h-16 w-16 mb-6 text-muted-foreground" /> {/* Enhanced empty state icon */}
+            <p className="text-xl font-semibold text-foreground">Your list is empty.</p> {/* Enhanced empty state text */}
+            <p className="text-sm mt-1">Select sins from the left or add custom ones to begin your reflection.</p> {/* Enhanced empty state text */}
           </div>
         ) : (
-          <ScrollArea className="h-[400px] pr-3">
+          <ScrollArea className="h-[400px] pr-3"> {/* pr-3 for scrollbar gap */}
             <div className="space-y-4">
               {sins.map((sin) => (
                 <SinItemCard key={sin.id} sin={sin} onRemoveSin={onRemoveSin} />

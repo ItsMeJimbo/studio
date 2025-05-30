@@ -48,7 +48,7 @@ export default function SelectSinSection({ onAddSin }: SelectSinSectionProps) {
         <CardTitle className="text-2xl">Select Sin</CardTitle>
         <CardDescription>Choose from predefined sins or add your own. You can search the predefined lists below.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6"> {/* Adjusted padding */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
