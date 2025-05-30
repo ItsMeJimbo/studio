@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -22,9 +23,10 @@ import { Sparkles, ListX } from 'lucide-react';
 interface MySinsSectionProps {
   sins: Sin[];
   onClearSins: () => void;
+  onRemoveSin: (sinId: string) => void; // Added onRemoveSin prop
 }
 
-export default function MySinsSection({ sins, onClearSins }: MySinsSectionProps) {
+export default function MySinsSection({ sins, onClearSins, onRemoveSin }: MySinsSectionProps) {
   return (
     <Card className="shadow-lg flex flex-col">
       <CardHeader>
@@ -39,10 +41,10 @@ export default function MySinsSection({ sins, onClearSins }: MySinsSectionProps)
             <p>Select sins from the left or add custom ones to begin your reflection.</p>
           </div>
         ) : (
-          <ScrollArea className="h-[400px] pr-3"> {/* Added pr-3 for scrollbar visibility */}
+          <ScrollArea className="h-[400px] pr-3">
             <div className="space-y-4">
               {sins.map((sin) => (
-                <SinItemCard key={sin.id} sin={sin} />
+                <SinItemCard key={sin.id} sin={sin} onRemoveSin={onRemoveSin} /> // Pass onRemoveSin
               ))}
             </div>
           </ScrollArea>

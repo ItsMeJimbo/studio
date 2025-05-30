@@ -1,6 +1,7 @@
 
 "use client";
 
+import type { Sin } from '@/types'; // Import Sin type
 import React from 'react';
 import {
   Dialog,
@@ -16,11 +17,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BookOpenCheck } from 'lucide-react';
+import { Button } from "@/components/ui/button"; // Import Button
+import { BookOpenCheck, PlusCircle } from 'lucide-react'; // Import PlusCircle
+import { useToast } from "@/hooks/use-toast";
+
 
 interface ExaminationGuideDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  onAddSin: (sinDetails: Omit<Sin, 'id' | 'addedAt'>) => void; // Add onAddSin prop
 }
 
 const examinationSections = [
@@ -84,7 +89,22 @@ const examinationSections = [
   },
 ];
 
-export default function ExaminationGuideDialog({ isOpen, onOpenChange }: ExaminationGuideDialogProps) {
+export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin }: ExaminationGuideDialogProps) {
+  const { toast } = useToast();
+
+  const handleAddFromExamination = (question: string, sectionTitle: string) => {
+    onAddSin({
+      title: question,
+      type: 'Custom',
+      description: `From Examination: ${sectionTitle}`,
+      tags: ['examination'],
+    });
+    toast({
+      title: "Added to List",
+      description: `"${question.substring(0, 50)}..." added from examination.`,
+    });
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[80vh] flex flex-col">
@@ -94,7 +114,7 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange }: Examina
             Examination of Conscience
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            A tool to help you reflect on your actions in preparation for confession or personal spiritual growth.
+            A tool to help you reflect on your actions. Click the (+) to add an item to your list.
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="flex-grow mt-4 pr-3">
@@ -105,9 +125,20 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange }: Examina
                   {section.title}
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-4">
-                  <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                  <ul className="space-y-2 text-sm text-muted-foreground">
                     {section.questions.map((question, qIndex) => (
-                      <li key={qIndex}>{question}</li>
+                      <li key={qIndex} className="flex items-start justify-between gap-2 py-1">
+                        <span className="flex-grow break-words">{question}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          onClick={() => handleAddFromExamination(question, section.title)}
+                          aria-label="Add to my sins list"
+                        >
+                          <PlusCircle className="h-4 w-4" />
+                        </Button>
+                      </li>
                     ))}
                   </ul>
                 </AccordionContent>

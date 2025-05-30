@@ -7,7 +7,7 @@ import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
 import ExaminationGuideDialog from "./ExaminationGuideDialog";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, DollarSign } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,15 @@ export default function ConfessEaseApp() {
     setSins((prevSins) => [...prevSins, newSin]);
     toast({
       title: "Sin Added",
-      description: `"${newSin.title}" has been added to your list.`,
+      description: `"${newSin.title.substring(0,50)}..." has been added to your list.`,
+    });
+  };
+
+  const removeSin = (sinId: string) => {
+    setSins((prevSins) => prevSins.filter((sin) => sin.id !== sinId));
+    toast({
+      title: "Sin Removed",
+      description: "The item has been removed from your list.",
     });
   };
 
@@ -73,7 +81,7 @@ export default function ConfessEaseApp() {
 
       <main className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <SelectSinSection onAddSin={addSin} />
-        <MySinsSection sins={sins} onClearSins={clearSins} />
+        <MySinsSection sins={sins} onClearSins={clearSins} onRemoveSin={removeSin} />
       </main>
 
       <footer className="text-center py-8 mt-12 text-xs sm:text-sm text-muted-foreground border-t">
@@ -110,7 +118,11 @@ export default function ConfessEaseApp() {
         </div>
         <p className="mt-8">&copy; {new Date().getFullYear()} ConfessEase. 100% private and offline.</p>
       </footer>
-      <ExaminationGuideDialog isOpen={isExaminationGuideOpen} onOpenChange={setIsExaminationGuideOpen} />
+      <ExaminationGuideDialog 
+        isOpen={isExaminationGuideOpen} 
+        onOpenChange={setIsExaminationGuideOpen}
+        onAddSin={addSin} 
+      />
     </div>
   );
 }
