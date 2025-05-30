@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, LinkIcon, YoutubeIcon, LandmarkIcon, BookOpenIcon } from 'lucide-react';
+import { ChevronLeft, LinkIcon, YoutubeIcon, LandmarkIcon, BookOpenIcon, BookMarked } from 'lucide-react'; // Added BookMarked
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
