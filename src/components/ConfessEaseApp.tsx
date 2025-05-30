@@ -6,12 +6,13 @@ import { LOCAL_STORAGE_SINS_KEY } from "@/lib/constants";
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import ExaminationGuideDialog from "./ExaminationGuideDialog";
-import PrayersDialog from "./PrayersDialog"; // Added import
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText } from "lucide-react"; // Added BookText
+// ExaminationGuideDialog is removed
+import PrayersDialog from "./PrayersDialog";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { Button } from "@/components/ui/button";
+import Link from 'next/link'; // Added Link import
 
 // Simple TikTok SVG icon
 const TikTokIcon = () => (
@@ -24,8 +25,8 @@ const TikTokIcon = () => (
 export default function ConfessEaseApp() {
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const { toast } = useToast();
-  const [isExaminationGuideOpen, setIsExaminationGuideOpen] = React.useState(false);
-  const [isPrayersDialogOpen, setIsPrayersDialogOpen] = React.useState(false); // Added state for PrayersDialog
+  // State for ExaminationGuideDialog is removed
+  const [isPrayersDialogOpen, setIsPrayersDialogOpen] = React.useState(false);
 
   const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
     setSins((prevSins) => {
@@ -37,7 +38,7 @@ export default function ConfessEaseApp() {
       let toastMessageTitle = "Sin Added";
       let toastMessageDescription = `"${sinDetails.title.substring(0,50)}..." has been added to your list.`;
 
-      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { // Only count non-custom sins
+      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') {
         newSinsList = prevSins.map((s, index) => {
           if (index === existingSinIndex) {
             const newCount = (s.count || 1) + 1;
@@ -100,20 +101,21 @@ export default function ConfessEaseApp() {
             </h1>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Link href="/examination" passHref>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                <BookOpenCheck className="mr-2 h-5 w-5" />
+                Examination of Conscience
+              </Button>
+            </Link>
             <Button
               variant="outline"
-              onClick={() => setIsExaminationGuideOpen(true)}
+              onClick={() => setIsPrayersDialogOpen(true)}
               className="w-full sm:w-auto"
             >
-              <BookOpenCheck className="mr-2 h-5 w-5" />
-              Examination of Conscience
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsPrayersDialogOpen(true)} // Added onClick for PrayersDialog
-              className="w-full sm:w-auto"
-            >
-              <BookText className="mr-2 h-5 w-5" /> {/* Added Icon */}
+              <BookText className="mr-2 h-5 w-5" />
               Prayers
             </Button>
           </div>
@@ -169,11 +171,7 @@ export default function ConfessEaseApp() {
         <p className="mt-8">&copy; {new Date().getFullYear()} Inner Peace. 100% private and offline.</p>
       </footer>
 
-      <ExaminationGuideDialog 
-        isOpen={isExaminationGuideOpen} 
-        onOpenChange={setIsExaminationGuideOpen}
-        onAddSin={addSin} 
-      />
+      {/* ExaminationGuideDialog component and its toggle logic are removed */}
       <PrayersDialog
         isOpen={isPrayersDialogOpen}
         onOpenChange={setIsPrayersDialogOpen}
