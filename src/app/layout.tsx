@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'ConfessEase - Personal Reflection',
   description: 'A private app for Catholic confession preparation and reflection.',
-  manifest: '/manifest.json', // Added for PWA
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
         {/* Theme color for PWA */}
         <meta name="theme-color" content="#85c7f9" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
         <ThemeProvider>
           {children}
           <Toaster />
