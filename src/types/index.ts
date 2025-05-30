@@ -1,3 +1,4 @@
+
 export interface Sin {
   id: string;
   title: string;
@@ -5,4 +6,5 @@ export interface Sin {
   description?: string; // For custom sin notes or user reflections
   tags?: string[];
   addedAt: string; // ISO Date string
+  count?: number; // To track occurrences of the same sin
 }

@@ -25,24 +25,56 @@ export default function ConfessEaseApp() {
   const { toast } = useToast();
   const [isExaminationGuideOpen, setIsExaminationGuideOpen] = React.useState(false);
 
-  const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt'>) => {
-    const newSin: Sin = {
-      ...sinDetails,
-      id: crypto.randomUUID(),
-      addedAt: new Date().toISOString(),
-    };
-    setSins((prevSins) => [...prevSins, newSin]);
-    toast({
-      title: "Sin Added",
-      description: `"${newSin.title.substring(0,50)}..." has been added to your list.`,
+  const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
+    setSins((prevSins) => {
+      const existingSinIndex = prevSins.findIndex(
+        (s) => s.title === sinDetails.title && s.type === sinDetails.type
+      );
+
+      let newSinsList;
+      let toastMessageTitle = "Sin Added";
+      let toastMessageDescription = `"${sinDetails.title.substring(0,50)}..." has been added to your list.`;
+
+      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { // Only count non-custom sins for now, custom sins are unique by definition
+        newSinsList = prevSins.map((s, index) => {
+          if (index === existingSinIndex) {
+            const newCount = (s.count || 1) + 1;
+            toastMessageTitle = "Sin Count Increased";
+            toastMessageDescription = `Count for "${s.title.substring(0,50)}..." is now ${newCount}.`;
+            return { ...s, count: newCount };
+          }
+          return s;
+        });
+      } else {
+        const newSinEntry: Sin = {
+          ...sinDetails,
+          id: crypto.randomUUID(),
+          addedAt: new Date().toISOString(),
+          count: 1,
+        };
+        newSinsList = [...prevSins, newSinEntry];
+      }
+      
+      toast({
+        title: toastMessageTitle,
+        description: toastMessageDescription,
+      });
+      return newSinsList;
     });
   };
 
   const removeSin = (sinId: string) => {
-    setSins((prevSins) => prevSins.filter((sin) => sin.id !== sinId));
+    let removedSinTitle = "The item";
+    setSins((prevSins) => {
+      const sinToRemove = prevSins.find(sin => sin.id === sinId);
+      if (sinToRemove) {
+        removedSinTitle = `"${sinToRemove.title.substring(0,50)}..."`;
+      }
+      return prevSins.filter((sin) => sin.id !== sinId)
+    });
     toast({
       title: "Sin Removed",
-      description: "The item has been removed from your list.",
+      description: `${removedSinTitle} has been removed from your list.`,
     });
   };
 
@@ -87,7 +119,13 @@ export default function ConfessEaseApp() {
       <footer className="text-center py-8 mt-12 text-xs sm:text-sm text-muted-foreground border-t">
         <div className="mb-8">
           <h3 className="text-base font-semibold text-foreground mb-3">Support Our Mission</h3>
-          <a href="https://www.patreon.com/c/MoroccanChristians" target="_blank" rel="noopener noreferrer" aria-label="Patreon" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-md">
+          <a 
+            href="https://www.patreon.com/c/MoroccanChristians" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            aria-label="Patreon" 
+            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-md"
+          >
             <Heart className="mr-2 h-5 w-5" />
             Support on Patreon
           </a>

@@ -34,13 +34,18 @@ export default function SinItemCard({ sin, onRemoveSin }: SinItemCardProps) {
     <Card className="overflow-hidden shadow-md transition-all hover:shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-grow min-w-0"> {/* Ensure this div can grow and text wraps */}
-            <CardTitle className="text-lg leading-tight break-words">{sin.title}</CardTitle>
+          <div className="flex-grow min-w-0">
+            <CardTitle className="text-lg leading-tight break-words">
+              {sin.title}
+              {sin.count && sin.count > 1 && (
+                <span className="ml-2 text-sm font-normal text-muted-foreground">(x{sin.count})</span>
+              )}
+            </CardTitle>
           </div>
           <div className="flex items-center shrink-0">
             <Badge
               variant={sin.type === 'Mortal' ? 'destructive' : sin.type === 'Venial' ? 'secondary' : 'default'}
-              className="ml-2 shrink-0" // Ensure badge doesn't cause overflow
+              className="ml-2 shrink-0"
             >
                <div className="flex items-center gap-1.5">
                   <TypeIcon type={sin.type} />

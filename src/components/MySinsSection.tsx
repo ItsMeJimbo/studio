@@ -23,7 +23,7 @@ import { Sparkles, ListX } from 'lucide-react';
 interface MySinsSectionProps {
   sins: Sin[];
   onClearSins: () => void;
-  onRemoveSin: (sinId: string) => void; // Added onRemoveSin prop
+  onRemoveSin: (sinId: string) => void;
 }
 
 export default function MySinsSection({ sins, onClearSins, onRemoveSin }: MySinsSectionProps) {
@@ -44,7 +44,7 @@ export default function MySinsSection({ sins, onClearSins, onRemoveSin }: MySins
           <ScrollArea className="h-[400px] pr-3">
             <div className="space-y-4">
               {sins.map((sin) => (
-                <SinItemCard key={sin.id} sin={sin} onRemoveSin={onRemoveSin} /> // Pass onRemoveSin
+                <SinItemCard key={sin.id} sin={sin} onRemoveSin={onRemoveSin} />
               ))}
             </div>
           </ScrollArea>
@@ -62,9 +62,14 @@ export default function MySinsSection({ sins, onClearSins, onRemoveSin }: MySins
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Finish Confession?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will clear your entire list of sins. This action cannot be undone.
-                  Are you sure you want to proceed?
+                <AlertDialogDescription className="space-y-3">
+                  <p>This will clear your entire list of sins. This action cannot be undone.</p>
+                  <p className="font-semibold">Important:</p>
+                  <ul className="list-disc list-outside pl-5 text-sm space-y-1">
+                    <li>This app is a tool to aid your memory and reflection. It is not a substitute for sacramental confession with a priest.</li>
+                    <li>If you are unable to go to confession, consider making an Act of Perfect Contrition.</li>
+                  </ul>
+                   Are you sure you want to proceed?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

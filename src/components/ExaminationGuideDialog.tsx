@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { Sin } from '@/types'; // Import Sin type
+import type { Sin } from '@/types';
 import React from 'react';
 import {
   Dialog,
@@ -17,15 +17,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button"; // Import Button
-import { BookOpenCheck, PlusCircle } from 'lucide-react'; // Import PlusCircle
+import { Button } from "@/components/ui/button";
+import { BookOpenCheck, PlusCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 
 interface ExaminationGuideDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAddSin: (sinDetails: Omit<Sin, 'id' | 'addedAt'>) => void; // Add onAddSin prop
+  onAddSin: (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => void;
 }
 
 const examinationSections = [
@@ -95,14 +95,11 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
   const handleAddFromExamination = (question: string, sectionTitle: string) => {
     onAddSin({
       title: question,
-      type: 'Custom',
-      description: `From Examination: ${sectionTitle}`,
+      type: 'Custom', // Sins from examination are treated as 'Custom' for now, but unique by title
+      description: `From Examination Guide: ${sectionTitle}`,
       tags: ['examination'],
     });
-    toast({
-      title: "Added to List",
-      description: `"${question.substring(0, 50)}..." added from examination.`,
-    });
+    // Toast is handled by the main addSin function now
   };
 
   return (
@@ -117,7 +114,7 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
             A tool to help you reflect on your actions. Click the (+) to add an item to your list.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="flex-grow mt-4 pr-3">
+        <ScrollArea className="flex-grow mt-4 pr-3 min-h-0"> {/* Added min-h-0 */}
           <Accordion type="single" collapsible className="w-full space-y-3">
             {examinationSections.map((section, index) => (
               <AccordionItem value={`item-${index}`} key={index} className="border rounded-md shadow-sm bg-card">

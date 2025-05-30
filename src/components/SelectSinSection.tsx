@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Feather, ShieldAlert, PlusCircle, Search, Frown } from 'lucide-react';
 
 interface SelectSinSectionProps {
-  onAddSin: (sin: Omit<Sin, 'id' | 'addedAt'>) => void;
+  onAddSin: (sin: Omit<Sin, 'id' | 'addedAt' | 'count'>) => void;
 }
 
 export default function SelectSinSection({ onAddSin }: SelectSinSectionProps) {
@@ -78,7 +78,7 @@ export default function SelectSinSection({ onAddSin }: SelectSinSectionProps) {
                         <Button
                           key={sin.id}
                           variant="outline"
-                          className="w-full justify-start text-left h-auto py-2"
+                          className="w-full justify-start text-left h-auto py-2 whitespace-normal"
                           onClick={() => handleAddPredefinedSin(sin.title, category)}
                         >
                           {sin.title}
