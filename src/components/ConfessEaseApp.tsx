@@ -6,9 +6,11 @@ import { LOCAL_STORAGE_SINS_KEY } from "@/lib/constants";
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube } from "lucide-react"; // Changed DollarSign to Youtube
+import ExaminationGuideDialog from "./ExaminationGuideDialog"; // New
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 // Simple TikTok SVG icon
 const TikTokIcon = () => (
@@ -21,6 +23,7 @@ const TikTokIcon = () => (
 export default function ConfessEaseApp() {
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const { toast } = useToast();
+  const [isExaminationGuideOpen, setIsExaminationGuideOpen] = React.useState(false);
 
   const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt'>) => {
     const newSin: Sin = {
@@ -45,15 +48,25 @@ export default function ConfessEaseApp() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col font-sans"> {/* Use --font-geist-sans from layout */}
-      <header className="mb-10 text-center">
-        <div className="inline-flex items-center gap-3">
-          <Church className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            ConfessEase
-          </h1>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col font-sans">
+      <header className="mb-10">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Church className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+              ConfessEase
+            </h1>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => setIsExaminationGuideOpen(true)}
+            className="w-full sm:w-auto"
+          >
+            <BookOpenCheck className="mr-2 h-5 w-5" />
+            Examination of Conscience
+          </Button>
         </div>
-        <p className="text-sm sm:text-base text-muted-foreground mt-2 max-w-xl mx-auto">
+        <p className="text-sm sm:text-base text-muted-foreground mt-4 text-center sm:text-left max-w-xl mx-auto sm:mx-0">
           A peaceful space for personal reflection and spiritual preparation. All data is stored locally on your device.
         </p>
       </header>
@@ -89,6 +102,7 @@ export default function ConfessEaseApp() {
           </p>
         </div>
       </footer>
+      <ExaminationGuideDialog isOpen={isExaminationGuideOpen} onOpenChange={setIsExaminationGuideOpen} />
     </div>
   );
 }
