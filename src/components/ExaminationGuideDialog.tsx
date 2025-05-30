@@ -122,40 +122,38 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
           </DialogDescription>
         </DialogHeader>
         
-        {/* Wrapper div to handle flex sizing and provide a constrained context for ScrollArea */}
-        <div className="flex-1 mt-4 relative"> {/* Removed overflow-hidden from this intermediate div */}
-          <ScrollArea className="absolute inset-0">
-            {/* Added some padding to the Accordion itself if its content might touch the edges / scrollbar */}
-            <Accordion type="single" collapsible className="w-full space-y-3 p-2">
-              {examinationSections.map((section, index) => (
-                <AccordionItem value={`item-${index}`} key={index} className="border rounded-md shadow-sm bg-card">
-                  <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-base">
-                    {section.title}
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 pb-4"> {/* This already has padding for content */}
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      {examinationSections[index].questions.map((question, qIndex) => (
-                        <li key={qIndex} className="flex items-start justify-between gap-2 py-1">
-                          <span className="flex-grow break-words">{question}</span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7 shrink-0"
-                            onClick={() => handleAddFromExamination(question, section.title)}
-                            aria-label="Add to my sins list"
-                          >
-                            <PlusCircle className="h-4 w-4" />
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </ScrollArea>
-        </div>
+        {/* ScrollArea is now a direct flex child, taking up remaining space */}
+        <ScrollArea className="flex-1 mt-4 pr-1"> {/* Added pr-1 for scrollbar spacing, flex-1 to take available space */}
+          <Accordion type="single" collapsible className="w-full space-y-3 pb-4 px-1"> {/* Added pb-4 for bottom padding and px-1 for side padding */}
+            {examinationSections.map((section, index) => (
+              <AccordionItem value={`item-${index}`} key={index} className="border rounded-md shadow-sm bg-card">
+                <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-base">
+                  {section.title}
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {examinationSections[index].questions.map((question, qIndex) => (
+                      <li key={qIndex} className="flex items-start justify-between gap-2 py-1">
+                        <span className="flex-grow break-words">{question}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          onClick={() => handleAddFromExamination(question, section.title)}
+                          aria-label="Add to my sins list"
+                        >
+                          <PlusCircle className="h-4 w-4" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
 }
+
