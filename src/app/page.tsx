@@ -1,3 +1,7 @@
-export default function Home() {
-  return <></>;
+import ConfessEaseApp from '@/components/ConfessEaseApp';
+
+export default function HomePage() {
+  return (
+    <ConfessEaseApp />
+  );
 }
