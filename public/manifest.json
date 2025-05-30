@@ -2,6 +2,11 @@
   "name": "ConfessEase - Personal Reflection",
   "short_name": "ConfessEase",
   "description": "A private app for Catholic confession preparation and reflection.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2f0e1",
+  "theme_color": "#85c7f9",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -15,11 +20,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#85c7f9",
-  "background_color": "#f2efdc",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/"
+  ]
 }
