@@ -1,7 +1,6 @@
 
 "use client";
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,10 +10,7 @@ import { Input } from "@/components/ui/input";
 
 // Manually define metadata for client components if needed, or set in a parent layout/page.
 // For page.tsx, metadata can be exported directly.
-export const metadata: Metadata = {
-  title: 'Common Prayers - Inner Peace',
-  description: 'A collection of prayers to aid your reflection and spiritual practice.',
-};
+// The metadata object was removed from here as it's a client component.
 
 interface Prayer {
   title: string;
