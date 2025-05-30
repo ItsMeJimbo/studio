@@ -1,15 +1,62 @@
 
-import type { Metadata } from 'next';
+"use client";
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, SettingsIcon, LanguagesIcon } from 'lucide-react';
+import { ChevronLeft, SettingsIcon, Palette, Trash2, Check } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { useTheme } from '@/components/ThemeProvider';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, LOCAL_STORAGE_THEME_KEY } from "@/lib/constants";
+import type { Metadata } from 'next'; // Keep for potential future use if this page becomes a Server Component
 
-export const metadata: Metadata = {
-  title: 'Settings - Inner Peace',
-  description: 'Configure app settings.',
-};
+
+// Metadata can't be exported from client components.
+// If needed, set in a parent layout or via <Head> for dynamic updates.
+// export const metadata: Metadata = {
+//   title: 'Settings - Inner Peace',
+//   description: 'Configure app settings.',
+// };
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
+
+  const handleClearData = () => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_SINS_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_LAST_CONFESSION_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_THEME_KEY);
+      // Optionally, reload the page or reset app state in memory
+      // window.location.reload(); 
+      toast({
+        title: "App Data Cleared",
+        description: "All your local data (sins, last confession, theme) has been removed.",
+      });
+      // Reset theme to system default in the UI if it was stored
+      setTheme("system"); 
+    } catch (error) {
+      console.error("Error clearing app data:", error);
+      toast({
+        title: "Error",
+        description: "Could not clear app data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col font-sans">
       <header className="mb-8">
@@ -30,31 +77,67 @@ export default function SettingsPage() {
         </p>
       </header>
 
-      <main className="flex-grow space-y-6">
+      <main className="flex-grow space-y-8">
         <section className="p-6 border rounded-lg shadow-sm bg-card">
             <div className="flex items-center gap-3 mb-4">
-                <LanguagesIcon className="h-6 w-6 text-primary" />
-                <h2 className="text-xl font-semibold text-foreground">Language</h2>
+                <Palette className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">Appearance</h2>
             </div>
-            <p className="text-muted-foreground mb-2">
-                Current language: English (US)
+            <p className="text-muted-foreground mb-3">
+                Choose your preferred theme.
             </p>
-            <p className="text-sm text-muted-foreground">
-                Multilingual support (including Arabic, French, etc.) is planned for a future update.
-                Implementing full language switching requires a significant setup for internationalization (i18n)
-                and translation of all app content.
-            </p>
-             {/* Placeholder for language selection UI when implemented */}
-            {/* <Button variant="outline" disabled className="mt-4">Change Language (Coming Soon)</Button> */}
+            <RadioGroup
+              value={theme}
+              onValueChange={(value: string) => setTheme(value as "light" | "dark" | "system")}
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="light" id="theme-light" />
+                <Label htmlFor="theme-light" className="font-normal">Light</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="dark" id="theme-dark" />
+                <Label htmlFor="theme-dark" className="font-normal">Dark</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="system" id="theme-system" />
+                <Label htmlFor="theme-system" className="font-normal">System</Label>
+              </div>
+            </RadioGroup>
         </section>
 
-        {/* Add more settings sections here as needed */}
-        {/* 
         <section className="p-6 border rounded-lg shadow-sm bg-card">
-            <h2 className="text-xl font-semibold text-foreground mb-2">Theme</h2>
-            <p className="text-muted-foreground">Theme settings (e.g., light/dark mode override) could go here.</p>
+            <div className="flex items-center gap-3 mb-4">
+                <Trash2 className="h-6 w-6 text-destructive" />
+                <h2 className="text-xl font-semibold text-foreground">Data Management</h2>
+            </div>
+            <p className="text-muted-foreground mb-3">
+                Permanently remove all your app data stored in this browser. This includes your sin list, last confession date, and theme preferences. This action cannot be undone.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Clear All App Data
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will permanently delete all your reflection data, including your list of sins, recorded last confession date, and theme settings. This data cannot be recovered.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                    <Check className="mr-2 h-4 w-4" />
+                    Yes, delete all data
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
         </section>
-        */}
       </main>
 
       <footer className="text-center py-6 mt-8 text-xs sm:text-sm text-muted-foreground border-t">

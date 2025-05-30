@@ -1,6 +1,7 @@
 
 export const LOCAL_STORAGE_SINS_KEY = 'confessEaseSins';
 export const LOCAL_STORAGE_LAST_CONFESSION_KEY = 'confessEaseLastConfessionDate';
+export const LOCAL_STORAGE_THEME_KEY = 'confessEaseTheme';
 
 export const PREDEFINED_SINS_CATEGORIES = {
   VENIAL: 'Venial',
@@ -74,3 +75,4 @@ export const PREDEFINED_SINS_DATA: {
     { id: 'm25', title: 'Mutilation or serious self-harm.', keywords: ['grave self-harm'] },
   ],
 };
+
