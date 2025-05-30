@@ -8,7 +8,7 @@ import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
 import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
@@ -20,28 +20,46 @@ const TikTokIcon = () => (
   </svg>
 );
 
+interface ToastInfo {
+  title: string;
+  description: string;
+  duration?: number;
+}
 
 export default function ConfessEaseApp() {
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
   const { toast } = useToast();
+  const [toastInfo, setToastInfo] = useState<ToastInfo | null>(null);
+
+  useEffect(() => {
+    if (toastInfo) {
+      toast({
+        title: toastInfo.title,
+        description: toastInfo.description,
+        duration: toastInfo.duration,
+      });
+      setToastInfo(null); // Reset after showing
+    }
+  }, [toastInfo, toast]);
 
   const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
+    let newToastTitle = "Sin Added";
+    let newToastDescription = `"${sinDetails.title.substring(0,50)}..." has been added to your list.`;
+
     setSins((prevSins) => {
       const existingSinIndex = prevSins.findIndex(
         (s) => s.title === sinDetails.title && s.type === sinDetails.type && s.type !== 'Custom' // Custom sins with same title are distinct if description/tags differ
       );
 
       let newSinsList;
-      let toastMessageTitle = "Sin Added";
-      let toastMessageDescription = `"${sinDetails.title.substring(0,50)}..." has been added to your list.`;
 
       if (existingSinIndex !== -1) {
         newSinsList = prevSins.map((s, index) => {
           if (index === existingSinIndex) {
             const newCount = (s.count || 1) + 1;
-            toastMessageTitle = "Sin Count Increased";
-            toastMessageDescription = `Count for "${s.title.substring(0,50)}..." is now ${newCount}.`;
+            newToastTitle = "Sin Count Increased";
+            newToastDescription = `Count for "${s.title.substring(0,50)}..." is now ${newCount}.`;
             return { ...s, count: newCount, addedAt: new Date().toISOString() }; // Update addedAt for resorted list
           }
           return s;
@@ -54,12 +72,11 @@ export default function ConfessEaseApp() {
           count: 1,
         };
         newSinsList = [newSinEntry, ...prevSins]; // Add to top of list
+        // newToastTitle and newToastDescription are already set correctly for this case
       }
       
-      toast({
-        title: toastMessageTitle,
-        description: toastMessageDescription,
-      });
+      // Set toast info to be picked up by useEffect
+      setToastInfo({ title: newToastTitle, description: newToastDescription });
       // Sort by addedAt descending to show newest/updated first
       return newSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
     });
@@ -74,7 +91,7 @@ export default function ConfessEaseApp() {
       }
       return prevSins.filter((sin) => sin.id !== sinId)
     });
-    toast({
+    setToastInfo({
       title: "Sin Removed",
       description: `${removedSinTitle} has been removed from your list.`,
     });
@@ -84,14 +101,14 @@ export default function ConfessEaseApp() {
     if (action === 'confessAndClear') {
       setLastConfessionDate(new Date().toISOString());
       setSins([]);
-      toast({
+      setToastInfo({
         title: "Confession Finished & Recorded",
         description: "Your list has been cleared and the date updated. May you find peace.",
         duration: 5000,
       });
     } else { // 'clearOnly'
       setSins([]);
-      toast({
+      setToastInfo({
         title: "List Cleared",
         description: "Your list has been cleared for a new reflection.",
         duration: 5000,
