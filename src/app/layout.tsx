@@ -4,7 +4,7 @@ import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from '@/context/AuthContext'; // Import AuthProvider
+import { AuthProvider } from '@/context/AuthContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'ConfessEase - Personal Reflection',
   description: 'A private app for Catholic confession preparation and reflection.',
-  manifest: '/manifest.json', // Ensure manifest is linked
+  manifest: '/manifest.json',
   icons: {
     icon: '/icons/favicon.ico',
     apple: '/icons/apple-icon-180.png',
@@ -38,13 +38,10 @@ export default function RootLayout({
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F5DC" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#210 20% 12%" /> {/* Example dark theme color */}
-        {/* <link rel="manifest" href="/manifest.json" /> Ensure manifest is linked, also done via Metadata object */}
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#210 20% 12%" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="ConfessEase" />
-        {/* <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" data-ai-hint="app icon" /> */}
-        {/* <link rel="icon" href="/icons/favicon.ico" data-ai-hint="app logo" /> */}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
         <AuthProvider>
