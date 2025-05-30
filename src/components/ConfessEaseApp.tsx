@@ -6,7 +6,7 @@ import { LOCAL_STORAGE_SINS_KEY } from "@/lib/constants";
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, DollarSign } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube } from "lucide-react"; // Changed DollarSign to Youtube
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 
@@ -68,24 +68,24 @@ export default function ConfessEaseApp() {
         <div className="mt-6">
           <h3 className="text-sm font-semibold text-foreground mb-3">Support Us</h3>
           <div className="flex justify-center items-center space-x-4 sm:space-x-5">
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://instagram.com/moroccanchristians" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
               <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://x.com/moroccanmasihis" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter" className="text-muted-foreground hover:text-primary transition-colors">
               <Twitter className="h-5 w-5 sm:h-6 sm:w-6" />
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://www.facebook.com/profile.php?id=100088868626501" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors">
               <Facebook className="h-5 w-5 sm:h-6 sm:w-6" />
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://tiktok.com/@moroccanchristians" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="text-muted-foreground hover:text-primary transition-colors">
               <TikTokIcon />
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Patreon for monetary help" className="text-muted-foreground hover:text-primary transition-colors">
-              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />
+            <a href="https://www.youtube.com/@moroccanchristians" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors">
+              <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />
             </a>
           </div>
           <p className="text-xs mt-3 max-w-md mx-auto">
-            Your support helps keep ConfessEase running and improving. Please replace the links above with your actual social media and Patreon pages.
+            Your support helps keep ConfessEase running and improving. Follow us on our social media!
           </p>
         </div>
       </footer>
