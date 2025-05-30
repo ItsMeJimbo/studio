@@ -7,7 +7,8 @@ import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
 import ExaminationGuideDialog from "./ExaminationGuideDialog";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart } from "lucide-react";
+import PrayersDialog from "./PrayersDialog"; // Added import
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText } from "lucide-react"; // Added BookText
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export default function ConfessEaseApp() {
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const { toast } = useToast();
   const [isExaminationGuideOpen, setIsExaminationGuideOpen] = React.useState(false);
+  const [isPrayersDialogOpen, setIsPrayersDialogOpen] = React.useState(false); // Added state for PrayersDialog
 
   const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
     setSins((prevSins) => {
@@ -35,7 +37,7 @@ export default function ConfessEaseApp() {
       let toastMessageTitle = "Sin Added";
       let toastMessageDescription = `"${sinDetails.title.substring(0,50)}..." has been added to your list.`;
 
-      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { // Only count non-custom sins for now, custom sins are unique by definition
+      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { // Only count non-custom sins
         newSinsList = prevSins.map((s, index) => {
           if (index === existingSinIndex) {
             const newCount = (s.count || 1) + 1;
@@ -94,17 +96,27 @@ export default function ConfessEaseApp() {
           <div className="flex items-center gap-3">
             <Church className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-              ConfessEase
+              Inner Peace
             </h1>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setIsExaminationGuideOpen(true)}
-            className="w-full sm:w-auto"
-          >
-            <BookOpenCheck className="mr-2 h-5 w-5" />
-            Examination of Conscience
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => setIsExaminationGuideOpen(true)}
+              className="w-full sm:w-auto"
+            >
+              <BookOpenCheck className="mr-2 h-5 w-5" />
+              Examination of Conscience
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsPrayersDialogOpen(true)} // Added onClick for PrayersDialog
+              className="w-full sm:w-auto"
+            >
+              <BookText className="mr-2 h-5 w-5" /> {/* Added Icon */}
+              Prayers
+            </Button>
+          </div>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-4 text-center sm:text-left max-w-xl mx-auto sm:mx-0">
           A peaceful space for personal reflection and spiritual preparation. All data is stored locally on your device.
@@ -130,7 +142,7 @@ export default function ConfessEaseApp() {
             Support on Patreon
           </a>
           <p className="text-xs mt-3 max-w-md mx-auto">
-            Your generosity helps us continue developing and maintaining ConfessEase.
+            Your generosity helps us continue developing and maintaining Inner Peace.
           </p>
         </div>
 
@@ -154,12 +166,17 @@ export default function ConfessEaseApp() {
             </a>
           </div>
         </div>
-        <p className="mt-8">&copy; {new Date().getFullYear()} ConfessEase. 100% private and offline.</p>
+        <p className="mt-8">&copy; {new Date().getFullYear()} Inner Peace. 100% private and offline.</p>
       </footer>
+
       <ExaminationGuideDialog 
         isOpen={isExaminationGuideOpen} 
         onOpenChange={setIsExaminationGuideOpen}
         onAddSin={addSin} 
+      />
+      <PrayersDialog
+        isOpen={isPrayersDialogOpen}
+        onOpenChange={setIsPrayersDialogOpen}
       />
     </div>
   );
