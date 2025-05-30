@@ -133,7 +133,7 @@ export default function PasswordSetupDialog({ isOpen }: PasswordSetupDialogProps
           </DialogFooter>
         </form>
         <p className="text-xs text-muted-foreground pt-2 text-center">
-          Important: Your password and security answer are stored locally. If you clear your browser data or use a different browser/device, you'll need to set them up again. For this prototype, data is not hashed.
+          Important: Your password and security answer are stored locally on this device. If you clear your app data or use a different device, you'll need to set them up again. For this prototype, data is not hashed.
         </p>
       </DialogContent>
     </Dialog>
