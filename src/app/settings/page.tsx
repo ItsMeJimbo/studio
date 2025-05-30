@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, SettingsIcon, Palette, Trash2, Check } from 'lucide-react';
+import { ChevronLeft, SettingsIcon, Palette, Trash2, Check, KeyRound, ShieldQuestion, Lock } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useTheme } from '@/components/ThemeProvider';
@@ -20,42 +20,84 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, LOCAL_STORAGE_THEME_KEY } from "@/lib/constants";
-import type { Metadata } from 'next'; // Keep for potential future use if this page becomes a Server Component
+import { useAuth } from '@/context/AuthContext';
+import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
 
-// Metadata can't be exported from client components.
-// If needed, set in a parent layout or via <Head> for dynamic updates.
-// export const metadata: Metadata = {
-//   title: 'Settings - ConfessEase',
-//   description: 'Configure app settings.',
-// };
+const changePasswordSchema = z.object({
+  oldPassword: z.string().min(1, { message: "Old password is required." }),
+  newPassword: z.string().min(6, { message: "New password must be at least 6 characters." }),
+  confirmNewPassword: z.string().min(6, { message: "Please confirm your new password." }),
+}).refine(data => data.newPassword === data.confirmNewPassword, {
+  message: "New passwords don't match",
+  path: ["confirmNewPassword"],
+});
+type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
+
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { changePassword, resetApp, isPasswordSet } = useAuth(); // Added resetApp
 
-  const handleClearData = () => {
-    try {
-      localStorage.removeItem(LOCAL_STORAGE_SINS_KEY);
-      localStorage.removeItem(LOCAL_STORAGE_LAST_CONFESSION_KEY);
-      localStorage.removeItem(LOCAL_STORAGE_THEME_KEY);
-      // Optionally, reload the page or reset app state in memory
-      // window.location.reload(); 
-      toast({
-        title: "App Data Cleared",
-        description: "All your local data (sins, last confession, theme) has been removed.",
-      });
-      // Reset theme to system default in the UI if it was stored
-      setTheme("system"); 
-    } catch (error) {
-      console.error("Error clearing app data:", error);
-      toast({
-        title: "Error",
-        description: "Could not clear app data. Please try again.",
-        variant: "destructive",
-      });
+  const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
+  const [isResetAppDialogOpen, setIsResetAppDialogOpen] = useState(false);
+
+  const { control: changePasswordControl, handleSubmit: handleChangePasswordSubmit, reset: resetChangePasswordForm, formState: { errors: changePasswordErrors } } = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: { oldPassword: '', newPassword: '', confirmNewPassword: '' },
+  });
+
+  const handleClearAppData = () => {
+    // This function is now part of resetApp if password is set
+    // If password is not set, it would only clear non-auth data
+    // For consistency, we use resetApp from AuthContext if a password system is in place
+    if (isPasswordSet) {
+        setIsResetAppDialogOpen(true); // Trigger the reset app dialog which uses resetApp from context
+    } else {
+        // Fallback for non-password-protected state (though less likely with new flow)
+        try {
+            localStorage.removeItem(LOCAL_STORAGE_SINS_KEY);
+            localStorage.removeItem(LOCAL_STORAGE_LAST_CONFESSION_KEY);
+            localStorage.removeItem(LOCAL_STORAGE_THEME_KEY);
+            toast({
+                title: "App Data Cleared",
+                description: "Your local data (sins, last confession, theme) has been removed.",
+            });
+            setTheme("system");
+        } catch (error) {
+            console.error("Error clearing app data:", error);
+            toast({
+                title: "Error",
+                description: "Could not clear app data. Please try again.",
+                variant: "destructive",
+            });
+        }
     }
   };
+
+  const onSubmitChangePassword = (data: ChangePasswordFormData) => {
+    if (changePassword(data.oldPassword, data.newPassword)) {
+      toast({ title: "Password Changed", description: "Your password has been successfully updated." });
+      resetChangePasswordForm();
+      setIsChangePasswordDialogOpen(false);
+    } else {
+      toast({ title: "Error", description: "Incorrect old password. Please try again.", variant: "destructive" });
+    }
+  };
+
+  const handleResetAppConfirm = () => {
+    resetApp(); // This will clear all data including auth and show its own toast
+    setIsResetAppDialogOpen(false);
+    setTheme("system"); // Reset theme in UI
+    // Potentially redirect or force reload if needed for full reset effect
+    // window.location.href = "/"; // To re-trigger auth flow
+  };
+
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col font-sans">
@@ -73,7 +115,7 @@ export default function SettingsPage() {
           </Link>
         </div>
          <p className="text-sm sm:text-base text-muted-foreground mt-3 text-center sm:text-left">
-          Manage your application preferences here.
+          Manage your application preferences and security here.
         </p>
       </header>
 
@@ -106,39 +148,104 @@ export default function SettingsPage() {
             </RadioGroup>
         </section>
 
+        {isPasswordSet && (
+          <section className="p-6 border rounded-lg shadow-sm bg-card">
+            <div className="flex items-center gap-3 mb-4">
+              <Lock className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Security</h2>
+            </div>
+            <p className="text-muted-foreground mb-3">
+              Manage your application password. Remember, this password is local to this browser.
+            </p>
+            <Button onClick={() => setIsChangePasswordDialogOpen(true)}>
+              <KeyRound className="mr-2 h-4 w-4" />
+              Change Password
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+                If you've forgotten your password, log out and use the "Forgot Password" option on the login screen.
+            </p>
+          </section>
+        )}
+
         <section className="p-6 border rounded-lg shadow-sm bg-card">
             <div className="flex items-center gap-3 mb-4">
                 <Trash2 className="h-6 w-6 text-destructive" />
                 <h2 className="text-xl font-semibold text-foreground">Data Management</h2>
             </div>
             <p className="text-muted-foreground mb-3">
-                Permanently remove all your app data stored in this browser. This includes your sin list, last confession date, and theme preferences. This action cannot be undone.
+                Permanently remove all your app data stored in this browser. This includes your sin list, last confession date, theme preferences, and {isPasswordSet ? "your password settings." : "any locally stored data."} This action cannot be undone.
             </p>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Clear All App Data
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action will permanently delete all your reflection data, including your list of sins, recorded last confession date, and theme settings. This data cannot be recovered.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleClearData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                    <Check className="mr-2 h-4 w-4" />
-                    Yes, delete all data
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button variant="destructive" onClick={handleClearAppData}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                {isPasswordSet ? "Reset Entire App (Clear All Data & Password)" : "Clear All App Data"}
+            </Button>
         </section>
       </main>
+
+      {/* Change Password Dialog */}
+      <AlertDialog open={isChangePasswordDialogOpen} onOpenChange={setIsChangePasswordDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change Password</AlertDialogTitle>
+            <AlertDialogDescription>
+              Enter your old password and set a new one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form onSubmit={handleChangePasswordSubmit(onSubmitChangePassword)} className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="oldPassword">Old Password</Label>
+              <Controller
+                name="oldPassword"
+                control={changePasswordControl}
+                render={({ field }) => <Input id="oldPassword" type="password" {...field} />}
+              />
+              {changePasswordErrors.oldPassword && <p className="text-sm text-destructive mt-1">{changePasswordErrors.oldPassword.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="newPassword">New Password</Label>
+              <Controller
+                name="newPassword"
+                control={changePasswordControl}
+                render={({ field }) => <Input id="newPassword" type="password" {...field} />}
+              />
+              {changePasswordErrors.newPassword && <p className="text-sm text-destructive mt-1">{changePasswordErrors.newPassword.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+              <Controller
+                name="confirmNewPassword"
+                control={changePasswordControl}
+                render={({ field }) => <Input id="confirmNewPassword" type="password" {...field} />}
+              />
+              {changePasswordErrors.confirmNewPassword && <p className="text-sm text-destructive mt-1">{changePasswordErrors.confirmNewPassword.message}</p>}
+            </div>
+            <AlertDialogFooter className="pt-2">
+              <AlertDialogCancel type="button" onClick={() => { resetChangePasswordForm(); setIsChangePasswordDialogOpen(false); }}>Cancel</AlertDialogCancel>
+              <AlertDialogAction type="submit">Change Password</AlertDialogAction>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reset App Data Dialog */}
+       <AlertDialog open={isResetAppDialogOpen} onOpenChange={setIsResetAppDialogOpen}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                This action will permanently delete all your reflection data, including your list of sins, recorded last confession date, theme settings, and your password settings. This data cannot be recovered. You will need to set up a new password.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetAppConfirm} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                <Check className="mr-2 h-4 w-4" />
+                Yes, reset entire app
+                </AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
 
       <footer className="text-center py-6 mt-8 text-xs sm:text-sm text-muted-foreground border-t">
         <p>&copy; {new Date().getFullYear()} ConfessEase. All data stored locally.</p>

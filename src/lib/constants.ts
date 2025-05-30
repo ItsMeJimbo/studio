@@ -4,6 +4,12 @@ export const LOCAL_STORAGE_LAST_CONFESSION_KEY = 'confessEaseLastConfessionDate'
 export const LOCAL_STORAGE_THEME_KEY = 'confessEaseTheme';
 export const TEMP_EXAMINATION_SINS_KEY = 'confessEaseTempExaminationSins';
 
+// Auth related keys
+export const LOCAL_STORAGE_PASSWORD_HASH_KEY = 'confessEasePasswordHash';
+export const LOCAL_STORAGE_SECURITY_QUESTION_KEY = 'confessEaseSecurityQuestion';
+export const LOCAL_STORAGE_SECURITY_ANSWER_KEY = 'confessEaseSecurityAnswer';
+export const LOCAL_STORAGE_PASSWORD_SET_KEY = 'confessEasePasswordSet';
+
 
 export const PREDEFINED_SINS_CATEGORIES = {
   VENIAL: 'Venial',

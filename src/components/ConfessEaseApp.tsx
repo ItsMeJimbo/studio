@@ -6,14 +6,29 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
+import { useAuth } from "@/context/AuthContext";
+import PasswordSetupDialog from "./PasswordSetupDialog";
+import LoginDialog from "./LoginDialog";
+import ForgotPasswordDialog from "./ForgotPasswordDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
-// Simple TikTok SVG icon
+
 const TikTokIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="currentColor" viewBox="0 0 16 16">
     <path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3V0Z"/>
@@ -27,19 +42,38 @@ interface ToastInfo {
 }
 
 export default function ConfessEaseApp() {
+  const { isAuthenticated, isPasswordSet, isLoading, logout } = useAuth();
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
-  const { toast } = useToast();
+  const { toast } = useToast(); // Direct useToast
   const [toastInfo, setToastInfo] = useState<ToastInfo | null>(null);
+
+  const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
+  const [showSecurityDisclaimer, setShowSecurityDisclaimer] = useState(false);
+
+
+  useEffect(() => {
+    // Check if the disclaimer has been shown before
+    const disclaimerShown = localStorage.getItem('securityDisclaimerShown');
+    if (isPasswordSet && !disclaimerShown) {
+      setShowSecurityDisclaimer(true);
+    }
+  }, [isPasswordSet]);
+
+  const handleDisclaimerClose = () => {
+    localStorage.setItem('securityDisclaimerShown', 'true');
+    setShowSecurityDisclaimer(false);
+  };
+
 
   useEffect(() => {
     if (toastInfo) {
-      toast({
+      toast({ // Direct call to toast function from useToast
         title: toastInfo.title,
         description: toastInfo.description,
         duration: toastInfo.duration,
       });
-      setToastInfo(null); // Reset after showing
+      setToastInfo(null); 
     }
   }, [toastInfo, toast]);
 
@@ -49,18 +83,18 @@ export default function ConfessEaseApp() {
 
     setSins((prevSins) => {
       const existingSinIndex = prevSins.findIndex(
-        (s) => s.title === sinDetails.title && s.type === sinDetails.type && s.type !== 'Custom' // Custom sins with same title are distinct if description/tags differ
+        (s) => s.title === sinDetails.title && s.type === sinDetails.type && s.type !== 'Custom' 
       );
 
       let newSinsList;
 
-      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { // Only increment count for non-custom sins
+      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { 
         newSinsList = prevSins.map((s, index) => {
           if (index === existingSinIndex) {
             const newCount = (s.count || 1) + 1;
             newToastTitle = "Sin Count Increased";
             newToastDescription = `Count for "${s.title.substring(0,50)}..." is now ${newCount}.`;
-            return { ...s, count: newCount, addedAt: new Date().toISOString() }; // Update addedAt for resorted list
+            return { ...s, count: newCount, addedAt: new Date().toISOString() }; 
           }
           return s;
         });
@@ -71,7 +105,7 @@ export default function ConfessEaseApp() {
           addedAt: new Date().toISOString(),
           count: 1,
         };
-        newSinsList = [newSinEntry, ...prevSins]; // Add to top of list
+        newSinsList = [newSinEntry, ...prevSins]; 
       }
       
       setToastInfo({ title: newToastTitle, description: newToastDescription });
@@ -95,6 +129,11 @@ export default function ConfessEaseApp() {
               });
             });
             localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
+             setToastInfo({
+              title: "Examination Items Added",
+              description: `${pendingSinsTitles.length} item(s) from the Examination Guide have been added to your list.`,
+              duration: 4000,
+            });
           }
         } catch (e) {
           console.error("Error processing pending examination sins:", e);
@@ -103,16 +142,16 @@ export default function ConfessEaseApp() {
       }
     };
 
-    processPendingExaminationSins(); 
-
-    const handleFocus = () => processPendingExaminationSins();
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
+    if(isAuthenticated){ // Only process if authenticated
+        processPendingExaminationSins(); 
+        const handleFocus = () => processPendingExaminationSins();
+        window.addEventListener('focus', handleFocus);
+        return () => {
+          window.removeEventListener('focus', handleFocus);
+        };
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to run on mount and set up focus listener. addSin is stable due to useCallback or if defined outside.
+  }, [isAuthenticated]); 
 
   const removeSin = (sinId: string) => {
     let removedSinTitle = "The item";
@@ -138,7 +177,7 @@ export default function ConfessEaseApp() {
         description: "Your list has been cleared and the date updated. May you find peace.",
         duration: 5000,
       });
-    } else { // 'clearOnly'
+    } else { 
       setSins([]);
       setToastInfo({
         title: "List Cleared",
@@ -152,8 +191,69 @@ export default function ConfessEaseApp() {
     ? format(parseISO(lastConfessionDate), 'MMM d, yyyy')
     : "Not recorded";
 
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <Church className="h-16 w-16 text-primary animate-pulse mx-auto mb-4" />
+          <p className="text-lg text-muted-foreground">Loading ConfessEase...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isPasswordSet) {
+    return <PasswordSetupDialog isOpen={true} />;
+  }
+
+  if (!isAuthenticated) {
+    return <>
+        <LoginDialog isOpen={true} onForgotPassword={() => setShowForgotPasswordDialog(true)} />
+        {showForgotPasswordDialog && 
+            <ForgotPasswordDialog 
+                isOpen={showForgotPasswordDialog} 
+                onOpenChange={setShowForgotPasswordDialog}
+                onPasswordResetSuccess={() => {
+                    setShowForgotPasswordDialog(false); 
+                    // LoginDialog should now grant access as isAuthenticated will be true
+                }}
+            />
+        }
+    </>;
+  }
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col font-sans">
+      {showSecurityDisclaimer && (
+        <AlertDialog open={showSecurityDisclaimer} onOpenChange={setShowSecurityDisclaimer}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <ShieldAlert className="h-6 w-6 text-destructive" />
+                Important Security Notice
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3 text-left">
+                <p>
+                  Welcome to ConfessEase! For your privacy, this app uses a local password stored directly in your browser.
+                </p>
+                <p>
+                  <strong>Please be aware:</strong> This method provides a basic layer of privacy against casual access if someone else uses your device. However, it is <strong>not a cryptographically secure system</strong> like a typical online account. A technically skilled person with access to your device or browser data could potentially bypass this protection.
+                </p>
+                <p>
+                  Your password and security question answer are stored as plain text in local storage for this prototype. In a production application, this data would be securely hashed.
+                </p>
+                <p>
+                  Do not use a highly sensitive password that you use for other critical accounts.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={handleDisclaimerClose}>I Understand</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
       <header className="mb-10">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
@@ -162,43 +262,30 @@ export default function ConfessEaseApp() {
               ConfessEase
             </h1>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
             <Link href="/examination" passHref>
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                <BookOpenCheck className="mr-2 h-5 w-5" />
-                Examination
+              <Button variant="outline" className="w-auto">
+                <BookOpenCheck className="mr-2 h-5 w-5" /> Examination
               </Button>
             </Link>
             <Link href="/prayers" passHref>
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                <BookText className="mr-2 h-5 w-5" />
-                Prayers
+              <Button variant="outline" className="w-auto">
+                <BookText className="mr-2 h-5 w-5" /> Prayers
               </Button>
             </Link>
             <Link href="/resources" passHref>
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                <BookMarked className="mr-2 h-5 w-5" />
-                Resources
+              <Button variant="outline" className="w-auto">
+                <BookMarked className="mr-2 h-5 w-5" /> Resources
               </Button>
             </Link>
              <Link href="/settings" passHref>
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                <SettingsIcon className="mr-2 h-5 w-5" />
-                Settings
+              <Button variant="outline" className="w-auto">
+                <SettingsIcon className="mr-2 h-5 w-5" /> Settings
               </Button>
             </Link>
+            <Button variant="ghost" size="sm" onClick={logout} className="text-muted-foreground hover:text-destructive w-auto">
+                <LogOut className="mr-2 h-5 w-5" /> Logout
+            </Button>
           </div>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-4 text-center sm:text-left max-w-xl mx-auto sm:mx-0">
@@ -255,6 +342,14 @@ export default function ConfessEaseApp() {
         </div>
         <p className="mt-8">&copy; 2025 ConfessEase. 100% Private and Offline.</p>
       </footer>
+       <ForgotPasswordDialog 
+            isOpen={showForgotPasswordDialog} 
+            onOpenChange={setShowForgotPasswordDialog}
+            onPasswordResetSuccess={() => {
+                setShowForgotPasswordDialog(false); 
+                // User is auto-logged in by resetPasswordWithSecurityAnswer
+            }}
+        />
     </div>
   );
 }
