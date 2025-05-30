@@ -62,22 +62,24 @@ export default function MySinsSection({ sins, onSessionFinish, onRemoveSin }: My
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Finish Reflection Session?</AlertDialogTitle>
-                <AlertDialogDescription className="space-y-3">
-                  <p>This will clear your current list of sins. You have a few options:</p>
-                  <ul className="list-disc list-outside pl-5 text-sm space-y-2">
-                    <li>
-                      <strong>Finish & Record Confession:</strong> Clears the list and updates your "Last Confession" date to today. Use this if you have completed sacramental confession.
-                    </li>
-                    <li>
-                      <strong>Clear List Only:</strong> Clears the list without updating the "Last Confession" date. Use this to start a new reflection session without marking a formal confession.
-                    </li>
-                  </ul>
-                  <p className="font-semibold mt-2">Important Reminder:</p>
-                  <ul className="list-disc list-outside pl-5 text-sm space-y-1">
-                    <li>This app is a tool to aid your memory and reflection. It is not a substitute for sacramental confession with a priest.</li>
-                    <li>If you are unable to go to confession, consider making an Act of Perfect Contrition.</li>
-                  </ul>
-                   Are you sure you want to proceed?
+                <AlertDialogDescription asChild>
+                  <div className="text-sm text-muted-foreground space-y-3">
+                    <p>This will clear your current list of sins. You have a few options:</p>
+                    <ul className="list-disc list-outside pl-5 text-sm space-y-2">
+                      <li>
+                        <strong>Finish & Record Confession:</strong> Clears the list and updates your "Last Confession" date to today. Use this if you have completed sacramental confession.
+                      </li>
+                      <li>
+                        <strong>Clear List Only:</strong> Clears the list without updating the "Last Confession" date. Use this to start a new reflection session without marking a formal confession.
+                      </li>
+                    </ul>
+                    <p className="font-semibold mt-2">Important Reminder:</p>
+                    <ul className="list-disc list-outside pl-5 text-sm space-y-1">
+                      <li>This app is a tool to aid your memory and reflection. It is not a substitute for sacramental confession with a priest.</li>
+                      <li>If you are unable to go to confession, consider making an Act of Perfect Contrition.</li>
+                    </ul>
+                    <p className="mt-3">Are you sure you want to proceed?</p>
+                  </div>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="grid grid-cols-1 sm:grid-cols-3 gap-2">
