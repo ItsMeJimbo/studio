@@ -85,6 +85,14 @@ const examinationSections = [
       "If an employer, have I been just and fair to my employees?",
       "As a citizen, have I fulfilled my civic duties and worked for the common good?",
       "Have I shown proper respect for the environment and God's creation?",
+      "Have I been neglectful in my duties towards my spouse, such as providing emotional support or fulfilling marital obligations with charity?",
+      "Have I failed to educate myself on important moral or social teachings of the Church relevant to my state in life?",
+      "Have I been imprudent in managing household finances, leading to unnecessary stress or hardship for my family?",
+      "Have I failed to correct my children with patience and love, or have I been overly harsh or permissive?",
+      "Have I been a poor witness to the faith in my workplace or community through my actions or inaction?",
+      "Have I shirked responsibilities that were reasonably expected of me in my professional or community roles?",
+      "Have I failed to vote or participate in civic life according to a well-formed conscience?",
+      "Have I exploited or taken unfair advantage of others in my professional or personal dealings?",
     ],
   },
 ];
@@ -95,11 +103,10 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
   const handleAddFromExamination = (question: string, sectionTitle: string) => {
     onAddSin({
       title: question,
-      type: 'Custom', // Sins from examination are treated as 'Custom' for now, but unique by title
+      type: 'Custom', 
       description: `From Examination Guide: ${sectionTitle}`,
       tags: ['examination'],
     });
-    // Toast is handled by the main addSin function now
   };
 
   return (
@@ -114,35 +121,40 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
             A tool to help you reflect on your actions. Click the (+) to add an item to your list.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="flex-1 mt-4 pr-3"> {/* Changed flex-grow min-h-0 to flex-1 */}
-          <Accordion type="single" collapsible className="w-full space-y-3">
-            {examinationSections.map((section, index) => (
-              <AccordionItem value={`item-${index}`} key={index} className="border rounded-md shadow-sm bg-card">
-                <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-base">
-                  {section.title}
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4">
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    {examinationSections[index].questions.map((question, qIndex) => (
-                      <li key={qIndex} className="flex items-start justify-between gap-2 py-1">
-                        <span className="flex-grow break-words">{question}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7 shrink-0"
-                          onClick={() => handleAddFromExamination(question, section.title)}
-                          aria-label="Add to my sins list"
-                        >
-                          <PlusCircle className="h-4 w-4" />
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </ScrollArea>
+        
+        {/* Wrapper div to handle flex sizing and provide a constrained context for ScrollArea */}
+        <div className="flex-1 mt-4 relative overflow-hidden">
+          <ScrollArea className="absolute inset-0">
+            {/* Added some padding to the Accordion itself if its content might touch the edges / scrollbar */}
+            <Accordion type="single" collapsible className="w-full space-y-3 p-2">
+              {examinationSections.map((section, index) => (
+                <AccordionItem value={`item-${index}`} key={index} className="border rounded-md shadow-sm bg-card">
+                  <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-base">
+                    {section.title}
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4"> {/* This already has padding for content */}
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      {examinationSections[index].questions.map((question, qIndex) => (
+                        <li key={qIndex} className="flex items-start justify-between gap-2 py-1">
+                          <span className="flex-grow break-words">{question}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7 shrink-0"
+                            onClick={() => handleAddFromExamination(question, section.title)}
+                            aria-label="Add to my sins list"
+                          >
+                            <PlusCircle className="h-4 w-4" />
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
