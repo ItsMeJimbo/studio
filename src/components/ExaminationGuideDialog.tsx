@@ -114,7 +114,7 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
             A tool to help you reflect on your actions. Click the (+) to add an item to your list.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="flex-grow mt-4 pr-3 min-h-0"> {/* Added min-h-0 */}
+        <ScrollArea className="flex-1 mt-4 pr-3"> {/* Changed flex-grow min-h-0 to flex-1 */}
           <Accordion type="single" collapsible className="w-full space-y-3">
             {examinationSections.map((section, index) => (
               <AccordionItem value={`item-${index}`} key={index} className="border rounded-md shadow-sm bg-card">
@@ -123,7 +123,7 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-4">
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    {section.questions.map((question, qIndex) => (
+                    {examinationSections[index].questions.map((question, qIndex) => (
                       <li key={qIndex} className="flex items-start justify-between gap-2 py-1">
                         <span className="flex-grow break-words">{question}</span>
                         <Button
