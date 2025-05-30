@@ -6,8 +6,7 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY } from "@/lib
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import PrayersDialog from "./PrayersDialog";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,6 @@ export default function ConfessEaseApp() {
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
   const { toast } = useToast();
-  const [isPrayersDialogOpen, setIsPrayersDialogOpen] = React.useState(false);
 
   const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
     setSins((prevSins) => {
@@ -125,14 +123,24 @@ export default function ConfessEaseApp() {
                 Examination
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              onClick={() => setIsPrayersDialogOpen(true)}
-              className="w-full sm:w-auto"
-            >
-              <BookText className="mr-2 h-5 w-5" />
-              Prayers
-            </Button>
+            <Link href="/prayers" passHref>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                <BookText className="mr-2 h-5 w-5" />
+                Prayers
+              </Button>
+            </Link>
+             <Link href="/settings" passHref>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                <SettingsIcon className="mr-2 h-5 w-5" />
+                Settings
+              </Button>
+            </Link>
           </div>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-4 text-center sm:text-left max-w-xl mx-auto sm:mx-0">
@@ -152,11 +160,11 @@ export default function ConfessEaseApp() {
       <footer className="text-center py-8 mt-12 text-xs sm:text-sm text-muted-foreground border-t">
         <div className="mb-8">
           <h3 className="text-base font-semibold text-foreground mb-3">Support Our Mission</h3>
-          <a 
-            href="https://www.patreon.com/c/MoroccanChristians" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            aria-label="Patreon" 
+          <a
+            href="https://www.patreon.com/c/MoroccanChristians"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Patreon"
             className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-md"
           >
             <Heart className="mr-2 h-5 w-5" />
@@ -189,11 +197,6 @@ export default function ConfessEaseApp() {
         </div>
         <p className="mt-8">&copy; {new Date().getFullYear()} Inner Peace. 100% private and offline.</p>
       </footer>
-
-      <PrayersDialog
-        isOpen={isPrayersDialogOpen}
-        onOpenChange={setIsPrayersDialogOpen}
-      />
     </div>
   );
 }
