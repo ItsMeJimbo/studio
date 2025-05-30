@@ -6,8 +6,8 @@ import { LOCAL_STORAGE_SINS_KEY } from "@/lib/constants";
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import ExaminationGuideDialog from "./ExaminationGuideDialog"; // New
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck } from "lucide-react";
+import ExaminationGuideDialog from "./ExaminationGuideDialog";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export default function ConfessEaseApp() {
     toast({
       title: "Confession Finished",
       description: "Your list has been cleared. May you find peace.",
-      duration: 5000, 
+      duration: 5000,
     });
   };
 
@@ -57,8 +57,8 @@ export default function ConfessEaseApp() {
               ConfessEase
             </h1>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setIsExaminationGuideOpen(true)}
             className="w-full sm:w-auto"
           >
@@ -77,9 +77,19 @@ export default function ConfessEaseApp() {
       </main>
 
       <footer className="text-center py-8 mt-12 text-xs sm:text-sm text-muted-foreground border-t">
-        <p>&copy; {new Date().getFullYear()} ConfessEase. 100% private and offline.</p>
-        <div className="mt-6">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Support Us</h3>
+        <div className="mb-8">
+          <h3 className="text-base font-semibold text-foreground mb-3">Support Our Mission</h3>
+          <a href="https://www.patreon.com/c/MoroccanChristians" target="_blank" rel="noopener noreferrer" aria-label="Patreon" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-md">
+            <Heart className="mr-2 h-5 w-5" />
+            Support on Patreon
+          </a>
+          <p className="text-xs mt-3 max-w-md mx-auto">
+            Your generosity helps us continue developing and maintaining ConfessEase.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Follow Us</h3>
           <div className="flex justify-center items-center space-x-4 sm:space-x-5">
             <a href="https://instagram.com/moroccanchristians" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
               <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -97,10 +107,8 @@ export default function ConfessEaseApp() {
               <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />
             </a>
           </div>
-          <p className="text-xs mt-3 max-w-md mx-auto">
-            Your support helps keep ConfessEase running and improving. Follow us on our social media!
-          </p>
         </div>
+        <p className="mt-8">&copy; {new Date().getFullYear()} ConfessEase. 100% private and offline.</p>
       </footer>
       <ExaminationGuideDialog isOpen={isExaminationGuideOpen} onOpenChange={setIsExaminationGuideOpen} />
     </div>
