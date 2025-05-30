@@ -2,17 +2,17 @@
 "use client";
 
 import type { Sin } from "@/types";
-import { LOCAL_STORAGE_SINS_KEY } from "@/lib/constants";
+import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY } from "@/lib/constants";
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-// ExaminationGuideDialog is removed
 import PrayersDialog from "./PrayersDialog";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import Link from 'next/link'; // Added Link import
+import Link from 'next/link';
+import { format, parseISO } from 'date-fns';
 
 // Simple TikTok SVG icon
 const TikTokIcon = () => (
@@ -24,27 +24,27 @@ const TikTokIcon = () => (
 
 export default function ConfessEaseApp() {
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
+  const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
   const { toast } = useToast();
-  // State for ExaminationGuideDialog is removed
   const [isPrayersDialogOpen, setIsPrayersDialogOpen] = React.useState(false);
 
   const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
     setSins((prevSins) => {
       const existingSinIndex = prevSins.findIndex(
-        (s) => s.title === sinDetails.title && s.type === sinDetails.type
+        (s) => s.title === sinDetails.title && s.type === sinDetails.type && s.type !== 'Custom' // Custom sins with same title are distinct if description/tags differ
       );
 
       let newSinsList;
       let toastMessageTitle = "Sin Added";
       let toastMessageDescription = `"${sinDetails.title.substring(0,50)}..." has been added to your list.`;
 
-      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') {
+      if (existingSinIndex !== -1) {
         newSinsList = prevSins.map((s, index) => {
           if (index === existingSinIndex) {
             const newCount = (s.count || 1) + 1;
             toastMessageTitle = "Sin Count Increased";
             toastMessageDescription = `Count for "${s.title.substring(0,50)}..." is now ${newCount}.`;
-            return { ...s, count: newCount };
+            return { ...s, count: newCount, addedAt: new Date().toISOString() }; // Update addedAt for resorted list
           }
           return s;
         });
@@ -55,14 +55,15 @@ export default function ConfessEaseApp() {
           addedAt: new Date().toISOString(),
           count: 1,
         };
-        newSinsList = [...prevSins, newSinEntry];
+        newSinsList = [newSinEntry, ...prevSins]; // Add to top of list
       }
       
       toast({
         title: toastMessageTitle,
         description: toastMessageDescription,
       });
-      return newSinsList;
+      // Sort by addedAt descending to show newest/updated first
+      return newSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
     });
   };
 
@@ -81,14 +82,28 @@ export default function ConfessEaseApp() {
     });
   };
 
-  const clearSins = () => {
-    setSins([]);
-    toast({
-      title: "Confession Finished",
-      description: "Your list has been cleared. May you find peace.",
-      duration: 5000,
-    });
+  const handleSessionFinish = (action: 'confessAndClear' | 'clearOnly') => {
+    if (action === 'confessAndClear') {
+      setLastConfessionDate(new Date().toISOString());
+      setSins([]);
+      toast({
+        title: "Confession Finished & Recorded",
+        description: "Your list has been cleared and the date updated. May you find peace.",
+        duration: 5000,
+      });
+    } else { // 'clearOnly'
+      setSins([]);
+      toast({
+        title: "List Cleared",
+        description: "Your list has been cleared for a new reflection.",
+        duration: 5000,
+      });
+    }
   };
+
+  const formattedLastConfessionDate = lastConfessionDate
+    ? format(parseISO(lastConfessionDate), 'MMM d, yyyy')
+    : "Not recorded";
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col font-sans">
@@ -107,7 +122,7 @@ export default function ConfessEaseApp() {
                 className="w-full sm:w-auto"
               >
                 <BookOpenCheck className="mr-2 h-5 w-5" />
-                Examination of Conscience
+                Examination
               </Button>
             </Link>
             <Button
@@ -123,11 +138,15 @@ export default function ConfessEaseApp() {
         <p className="text-sm sm:text-base text-muted-foreground mt-4 text-center sm:text-left max-w-xl mx-auto sm:mx-0">
           A peaceful space for personal reflection and spiritual preparation. All data is stored locally on your device.
         </p>
+        <div className="mt-4 text-sm text-center sm:text-left text-muted-foreground flex items-center gap-2 justify-center sm:justify-start">
+            <CalendarClock className="h-4 w-4 text-primary" />
+            <span>Last Confession: <strong>{formattedLastConfessionDate}</strong></span>
+        </div>
       </header>
 
       <main className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <SelectSinSection onAddSin={addSin} />
-        <MySinsSection sins={sins} onClearSins={clearSins} onRemoveSin={removeSin} />
+        <MySinsSection sins={sins} onSessionFinish={handleSessionFinish} onRemoveSin={removeSin} />
       </main>
 
       <footer className="text-center py-8 mt-12 text-xs sm:text-sm text-muted-foreground border-t">
@@ -171,7 +190,6 @@ export default function ConfessEaseApp() {
         <p className="mt-8">&copy; {new Date().getFullYear()} Inner Peace. 100% private and offline.</p>
       </footer>
 
-      {/* ExaminationGuideDialog component and its toggle logic are removed */}
       <PrayersDialog
         isOpen={isPrayersDialogOpen}
         onOpenChange={setIsPrayersDialogOpen}
