@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -46,7 +47,7 @@ export default function CustomSinDialog({ isOpen, onOpenChange, onAddCustomSin }
   const onSubmit = (data: CustomSinFormData) => {
     const tagsArray = data.tags?.split(',').map(tag => tag.trim()).filter(tag => tag !== '') || [];
     onAddCustomSin({ title: data.title, description: data.description, tags: tagsArray });
-    toast({ title: "Custom Sin Created", description: `"${data.title}" is ready to be added.` });
+    toast({ title: "Other Sin Entry Created", description: `"${data.title}" is ready to be added.` });
     reset();
     onOpenChange(false);
   };
@@ -58,7 +59,7 @@ export default function CustomSinDialog({ isOpen, onOpenChange, onAddCustomSin }
     }}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Custom Sin</DialogTitle>
+          <DialogTitle>Add Other Sin</DialogTitle>
           <DialogDescription>
             Add a personal sin entry with details and reflections.
           </DialogDescription>
@@ -93,7 +94,7 @@ export default function CustomSinDialog({ isOpen, onOpenChange, onAddCustomSin }
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => { reset(); onOpenChange(false); }}>Cancel</Button>
-            <Button type="submit">Add Custom Sin</Button>
+            <Button type="submit">Add This Sin</Button>
           </DialogFooter>
         </form>
       </DialogContent>

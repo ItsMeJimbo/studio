@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CustomSinDialog from './CustomSinDialog';
-import { Input } from '@/components/ui/input'; // Added Input import
-import { Feather, ShieldAlert, PlusCircle, Search, Frown } from 'lucide-react'; // Added Search and Frown icons
+import { Input } from '@/components/ui/input';
+import { Feather, ShieldAlert, PlusCircle, Search, Frown } from 'lucide-react';
 
 interface SelectSinSectionProps {
   onAddSin: (sin: Omit<Sin, 'id' | 'addedAt'>) => void;
@@ -71,7 +71,7 @@ export default function SelectSinSection({ onAddSin }: SelectSinSectionProps) {
             const sinsToList = filteredSins(category);
             return (
               <TabsContent key={category} value={category}>
-                <ScrollArea className="h-[250px] rounded-md border"> {/* Adjusted height and added border */}
+                <ScrollArea className="h-[250px] rounded-md border">
                   {sinsToList.length > 0 ? (
                     <div className="space-y-2 p-4">
                       {sinsToList.map((sin) => (
@@ -103,7 +103,7 @@ export default function SelectSinSection({ onAddSin }: SelectSinSectionProps) {
           onClick={() => setIsCustomSinDialogOpen(true)}
         >
           <PlusCircle className="h-5 w-5" />
-          Add Custom Sin
+          Add Other Sin
         </Button>
 
         <CustomSinDialog
