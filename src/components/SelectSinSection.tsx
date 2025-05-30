@@ -3,7 +3,7 @@
 
 import React from 'react';
 import type { Sin } from '@/types';
-import { PREDEFINED_SINS_DATA, PREDEFINED_SINS_CATEGORIES, SinCategoryType } from '@/lib/constants';
+import { PREDEFINED_SINS_DATA, PREDEFINED_SINS_CATEGORIES, SinCategoryType, PredefinedSinEntry } from '@/lib/constants';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,13 +28,18 @@ export default function SelectSinSection({ onAddSin }: SelectSinSectionProps) {
     onAddSin({ ...customSin, type: 'Custom' });
   };
 
-  const filteredSins = (category: SinCategoryType) => {
-    if (!searchTerm.trim()) {
+  const filteredSins = (category: SinCategoryType): PredefinedSinEntry[] => {
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    if (!lowerSearchTerm) {
       return PREDEFINED_SINS_DATA[category];
     }
-    return PREDEFINED_SINS_DATA[category].filter(sin =>
-      sin.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return PREDEFINED_SINS_DATA[category].filter(sin => {
+      const titleMatch = sin.title.toLowerCase().includes(lowerSearchTerm);
+      const keywordsMatch = sin.keywords?.some(keyword =>
+        keyword.toLowerCase().includes(lowerSearchTerm)
+      );
+      return titleMatch || keywordsMatch;
+    });
   };
 
   return (
@@ -48,7 +53,7 @@ export default function SelectSinSection({ onAddSin }: SelectSinSectionProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search predefined sins..."
+            placeholder="Search predefined sins by title or keyword..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
