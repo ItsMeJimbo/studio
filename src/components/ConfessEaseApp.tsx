@@ -110,7 +110,7 @@ export default function ConfessEaseApp() {
           <div className="flex items-center gap-3">
             <Church className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-              Inner Peace
+              ConfessEase
             </h1>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -171,7 +171,7 @@ export default function ConfessEaseApp() {
             Support on Patreon
           </a>
           <p className="text-xs mt-3 max-w-md mx-auto">
-            Your generosity helps us continue developing and maintaining Inner Peace.
+            Your generosity helps us continue developing and maintaining ConfessEase.
           </p>
         </div>
 
@@ -195,7 +195,7 @@ export default function ConfessEaseApp() {
             </a>
           </div>
         </div>
-        <p className="mt-8">&copy; {new Date().getFullYear()} Inner Peace. 100% private and offline.</p>
+        <p className="mt-8">&copy; {new Date().getFullYear()} ConfessEase. 100% private and offline.</p>
       </footer>
     </div>
   );

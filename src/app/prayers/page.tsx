@@ -157,7 +157,7 @@ export default function PrayersPage() {
       </main>
 
       <footer className="text-center py-6 mt-8 text-xs sm:text-sm text-muted-foreground border-t">
-        <p>&copy; {new Date().getFullYear()} Inner Peace. All data stored locally.</p>
+        <p>&copy; {new Date().getFullYear()} ConfessEase. All data stored locally.</p>
       </footer>
     </div>
   );

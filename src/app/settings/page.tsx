@@ -26,7 +26,7 @@ import type { Metadata } from 'next'; // Keep for potential future use if this p
 // Metadata can't be exported from client components.
 // If needed, set in a parent layout or via <Head> for dynamic updates.
 // export const metadata: Metadata = {
-//   title: 'Settings - Inner Peace',
+//   title: 'Settings - ConfessEase',
 //   description: 'Configure app settings.',
 // };
 
@@ -141,7 +141,7 @@ export default function SettingsPage() {
       </main>
 
       <footer className="text-center py-6 mt-8 text-xs sm:text-sm text-muted-foreground border-t">
-        <p>&copy; {new Date().getFullYear()} Inner Peace. All data stored locally.</p>
+        <p>&copy; {new Date().getFullYear()} ConfessEase. All data stored locally.</p>
       </footer>
     </div>
   );

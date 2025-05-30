@@ -7,7 +7,7 @@ import { ExaminationGuideAccordion } from '@/components/ExaminationGuideAccordio
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const metadata: Metadata = {
-  title: 'Examination of Conscience - Inner Peace',
+  title: 'Examination of Conscience - ConfessEase',
   description: 'A guide to help you reflect on your actions.',
 };
 
@@ -43,7 +43,7 @@ export default function ExaminationPage() {
       </main>
 
       <footer className="text-center py-6 mt-8 text-xs sm:text-sm text-muted-foreground border-t">
-        <p>&copy; {new Date().getFullYear()} Inner Peace. All data stored locally.</p>
+        <p>&copy; {new Date().getFullYear()} ConfessEase. All data stored locally.</p>
       </footer>
     </div>
   );
