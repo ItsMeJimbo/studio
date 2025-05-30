@@ -32,21 +32,16 @@ export default function RootLayout({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-        
-        <meta name="theme-color" content="#77B5FE" /> {/* Updated primary color */}
-        
+        <meta name="theme-color" content="#77B5FE" />
         <link rel="manifest" href="/manifest.json" />
-
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" /> 
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="ConfessEase" />
-        
         <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" data-ai-hint="app icon" />
-        
         <link rel="icon" href="/icons/favicon.ico" data-ai-hint="app logo" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
-        <AuthProvider> {/* Wrap with AuthProvider */}
+        <AuthProvider>
           <ThemeProvider>
             {children}
             <Toaster />
