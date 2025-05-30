@@ -104,7 +104,7 @@ export default function ExaminationGuideDialog({ isOpen, onOpenChange, onAddSin 
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl">
             <BookOpenCheck className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
