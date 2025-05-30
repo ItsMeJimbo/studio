@@ -7,6 +7,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { TEMP_EXAMINATION_SINS_KEY } from "@/lib/constants";
+import { useToast } from "@/hooks/use-toast";
 
 // Data for examination sections
 const examinationSections = [
@@ -79,6 +83,32 @@ const examinationSections = [
 ];
 
 export function ExaminationGuideAccordion() {
+  const { toast } = useToast();
+
+  const handleAddToList = (questionText: string) => {
+    try {
+      const existingItemsRaw = localStorage.getItem(TEMP_EXAMINATION_SINS_KEY);
+      let existingItems: string[] = [];
+      if (existingItemsRaw) {
+        existingItems = JSON.parse(existingItemsRaw);
+      }
+      existingItems.push(questionText);
+      localStorage.setItem(TEMP_EXAMINATION_SINS_KEY, JSON.stringify(existingItems));
+      toast({
+        title: "Added to Reflection List",
+        description: `"${questionText.substring(0, 50)}..." is ready. View on the main reflection page.`,
+        duration: 4000,
+      });
+    } catch (error) {
+      console.error("Error adding examination item to localStorage:", error);
+      toast({
+        title: "Error",
+        description: "Could not add item to list. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Accordion type="single" collapsible className="w-full space-y-3 pb-4 px-1">
       {examinationSections.map((section, index) => (
@@ -88,10 +118,18 @@ export function ExaminationGuideAccordion() {
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <ul className="space-y-2 text-sm text-muted-foreground">
-              {examinationSections[index].questions.map((question, qIndex) => (
+              {section.questions.map((question, qIndex) => (
                 <li key={qIndex} className="flex items-start justify-between gap-2 py-1">
                   <span className="flex-grow break-words">{question}</span>
-                  {/* "Add to list" button removed for this page-based version */}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 shrink-0 text-primary hover:text-primary/80"
+                    onClick={() => handleAddToList(question)}
+                    aria-label="Add to reflection list"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
                 </li>
               ))}
             </ul>

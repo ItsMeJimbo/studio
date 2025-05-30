@@ -2,11 +2,11 @@
 "use client";
 
 import type { Sin } from "@/types";
-import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY } from "@/lib/constants";
+import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINATION_SINS_KEY } from "@/lib/constants";
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,7 @@ export default function ConfessEaseApp() {
 
       let newSinsList;
 
-      if (existingSinIndex !== -1) {
+      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { // Only increment count for non-custom sins
         newSinsList = prevSins.map((s, index) => {
           if (index === existingSinIndex) {
             const newCount = (s.count || 1) + 1;
@@ -72,15 +72,47 @@ export default function ConfessEaseApp() {
           count: 1,
         };
         newSinsList = [newSinEntry, ...prevSins]; // Add to top of list
-        // newToastTitle and newToastDescription are already set correctly for this case
       }
       
-      // Set toast info to be picked up by useEffect
       setToastInfo({ title: newToastTitle, description: newToastDescription });
-      // Sort by addedAt descending to show newest/updated first
       return newSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
     });
   };
+
+  useEffect(() => {
+    const processPendingExaminationSins = () => {
+      const pendingSinsRaw = localStorage.getItem(TEMP_EXAMINATION_SINS_KEY);
+      if (pendingSinsRaw) {
+        try {
+          const pendingSinsTitles: string[] = JSON.parse(pendingSinsRaw);
+          if (Array.isArray(pendingSinsTitles) && pendingSinsTitles.length > 0) {
+            pendingSinsTitles.forEach(title => {
+              addSin({ 
+                title, 
+                type: 'Custom', 
+                description: 'From Examination Guide', 
+                tags: ['examination'] 
+              });
+            });
+            localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
+          }
+        } catch (e) {
+          console.error("Error processing pending examination sins:", e);
+          localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY); 
+        }
+      }
+    };
+
+    processPendingExaminationSins(); 
+
+    const handleFocus = () => processPendingExaminationSins();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array to run on mount and set up focus listener. addSin is stable due to useCallback or if defined outside.
 
   const removeSin = (sinId: string) => {
     let removedSinTitle = "The item";
@@ -149,6 +181,15 @@ export default function ConfessEaseApp() {
                 Prayers
               </Button>
             </Link>
+            <Link href="/resources" passHref>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                <BookMarked className="mr-2 h-5 w-5" />
+                Resources
+              </Button>
+            </Link>
              <Link href="/settings" passHref>
               <Button
                 variant="outline"
@@ -212,7 +253,7 @@ export default function ConfessEaseApp() {
             </a>
           </div>
         </div>
-        <p className="mt-8">&copy; {new Date().getFullYear()} ConfessEase. 100% private and offline.</p>
+        <p className="mt-8">&copy; 2025 ConfessEase. 100% Private and Offline.</p>
       </footer>
     </div>
   );

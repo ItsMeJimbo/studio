@@ -28,15 +28,11 @@ export default function ExaminationPage() {
           </Link>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-3 text-center sm:text-left">
-          A tool to help you reflect on your actions in light of Catholic teachings. Use this guide to prepare your heart.
+          A tool to help you reflect on your actions in light of Catholic teachings. Use this guide to prepare your heart. Click the (+) to add an item to your reflection list (it will appear on the main page).
         </p>
       </header>
 
       <main className="flex-grow">
-        {/* The ScrollArea will manage scrolling for the accordion content if it exceeds viewport.
-            The height is set to be responsive to viewport height minus estimated header/footer.
-            This might need adjustment based on actual header/footer heights.
-        */}
         <ScrollArea className="h-[calc(100vh-250px)] sm:h-[calc(100vh-220px)] rounded-md border p-1 sm:p-4">
              <ExaminationGuideAccordion />
         </ScrollArea>
