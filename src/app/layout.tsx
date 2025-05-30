@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'ConfessEase - Personal Reflection',
   description: 'A private app for Catholic confession preparation and reflection.',
+  manifest: '/manifest.json', // Added for PWA
 };
 
 export default function RootLayout({
@@ -26,6 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning> {/* suppressHydrationWarning for ThemeProvider */}
+      <head>
+        {/* Standard viewport meta tag, Next.js usually handles this but explicit for clarity */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Theme color for PWA */}
+        <meta name="theme-color" content="#85c7f9" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
           {children}
