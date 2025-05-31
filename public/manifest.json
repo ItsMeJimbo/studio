@@ -1,61 +1,57 @@
 {
-  "name": "ConfessEase",
-  "short_name": "ConfessEase",
-  "description": "A private app for Catholic confession preparation and reflection.",
+  "name": "My Catholic App",
+  "short_name": "CatholicApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/png"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "/icons/apple-icon-180.png",
-      "sizes": "180x180",
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ],
-  "theme_color": "#77B5FE",
-  "background_color": "#F5F5DC",
-  "start_url": "/",
   "id": "/",
   "scope": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "lang": "en",
-  "dir": "ltr",
-  "categories": ["lifestyle", "utilities", "book"],
-  "prefer_related_applications": false,
   "launch_handler": {
     "client_mode": "focus-existing"
   },
+  "categories": [
+    "lifestyle",
+    "utilities",
+    "education",
+    "religion"
+  ],
+  "description": "A private app for Catholic confession preparation and reflection.",
+  "dir": "ltr",
+  "lang": "en",
+  "prefer_related_applications": false,
   "screenshots": [
     {
       "src": "/screenshots/screenshot1.png",
       "sizes": "1080x1920",
       "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Main screen of ConfessEase"
+      "label": "Main screen showing sin selection and current list."
     },
     {
       "src": "/screenshots/screenshot2-wide.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Examination of Conscience page"
+      "label": "Examination of Conscience guide on a wider screen."
     }
   ]
 }
