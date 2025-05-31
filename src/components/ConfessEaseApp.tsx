@@ -6,7 +6,7 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+// Firebase imports
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { firebaseConfig } from '@/lib/firebaseConfig';
 
 
 const TikTokIcon = () => (
@@ -49,6 +54,83 @@ export default function ConfessEaseApp() {
 
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
   const [showSecurityDisclaimer, setShowSecurityDisclaimer] = useState(false);
+
+
+  // Initialize Firebase App
+  if (typeof window !== 'undefined' && getApps().length === 0) {
+    initializeApp(firebaseConfig);
+    // You can also initialize other Firebase services here if needed
+  }
+  
+  // FCM Setup Effect
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.Notification && isAuthenticated) {
+      const initFCM = async () => {
+        try {
+          const messaging = getMessaging(getApp()); // Get the initialized app
+
+          // --- Request Notification Permission ---
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            console.log('Notification permission granted.');
+
+            // --- Get FCM Token ---
+            // TODO: Replace 'YOUR_VAPID_KEY_HERE' with your actual VAPID key from Firebase Console
+            // (Firebase Project Settings > Cloud Messaging > Web configuration > Web Push certificates)
+            const currentToken = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' });
+            if (currentToken) {
+              console.log('FCM Token:', currentToken);
+              // Send this token to your server to send push notifications to this device
+              // For this app, we're just logging it.
+            } else {
+              console.log('No registration token available. Request permission to generate one.');
+            }
+          } else {
+            console.log('Unable to get permission to notify.');
+             toast({
+                title: "Notifications Disabled",
+                description: "You have not granted permission for notifications.",
+                variant: "default",
+                duration: 5000,
+            });
+          }
+
+          // --- Handle Foreground Messages ---
+          onMessage(messaging, (payload) => {
+            console.log('Message received in foreground. ', payload);
+            const notificationTitle = payload.notification?.title || "New Message";
+            const notificationBody = payload.notification?.body || "You have a new message.";
+            
+            toast({
+                title: notificationTitle,
+                description: notificationBody,
+                duration: 7000, // Keep it on screen a bit longer
+            });
+            // You could also display a custom in-app notification UI here
+          });
+
+        } catch (error) {
+          console.error('Error setting up Firebase Messaging:', error);
+           toast({
+              title: "Messaging Error",
+              description: "Could not initialize push notifications.",
+              variant: "destructive",
+          });
+        }
+      };
+
+      // Delay FCM initialization slightly to ensure other critical parts of the app have loaded
+      // and to avoid potential race conditions with service worker registrations.
+      const timer = setTimeout(() => {
+        if (isPasswordSet && isAuthenticated) { // Only init if user is fully logged in
+            initFCM();
+        }
+      }, 3000); 
+      
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isPasswordSet]); // Rerun if auth state changes
 
 
   useEffect(() => {
@@ -111,86 +193,93 @@ export default function ConfessEaseApp() {
     });
   }, [setSins, setToastInfo]);
 
-  useEffect(() => {
+ useEffect(() => {
     const processPendingExaminationSins = () => {
       const pendingSinsRaw = localStorage.getItem(TEMP_EXAMINATION_SINS_KEY);
       if (!pendingSinsRaw) return;
 
+      let pendingSinsTitles: string[] = [];
       try {
-        const pendingSinsTitles: string[] = JSON.parse(pendingSinsRaw);
-        if (!Array.isArray(pendingSinsTitles) || pendingSinsTitles.length === 0) {
+        const parsedPending = JSON.parse(pendingSinsRaw);
+        if (Array.isArray(parsedPending) && parsedPending.length > 0) {
+          pendingSinsTitles = parsedPending;
+        } else {
           localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
           return;
         }
-
-        const currentSinsRaw = localStorage.getItem(LOCAL_STORAGE_SINS_KEY);
-        let currentSins: Sin[] = [];
-        if (currentSinsRaw) {
-          try {
-            const parsedCurrentSins = JSON.parse(currentSinsRaw);
-            if (Array.isArray(parsedCurrentSins)) {
-                currentSins = parsedCurrentSins;
-            }
-          } catch (e) {
-            console.error("Error parsing current sins from localStorage:", e);
-            // currentSins remains []
-          }
-        }
-        
-        let updatedSinsList = [...currentSins];
-        let itemsAddedCount = 0;
-
-        pendingSinsTitles.forEach(title => {
-          const sinDetails = {
-            title,
-            type: 'Custom' as Sin['type'],
-            description: 'From Examination Guide',
-            tags: ['examination']
-          };
-
-          const isAlreadyAdded = updatedSinsList.some(
-            s => s.title === sinDetails.title && s.description === sinDetails.description && s.type === 'Custom'
-          );
-
-          if (!isAlreadyAdded) {
-            const newSinEntry: Sin = {
-              ...sinDetails,
-              id: crypto.randomUUID(),
-              addedAt: new Date().toISOString(),
-              count: 1,
-            };
-            updatedSinsList.unshift(newSinEntry);
-            itemsAddedCount++;
-          }
-        });
-
-        if (itemsAddedCount > 0) {
-          updatedSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
-          setSins(updatedSinsList);
-          setToastInfo({
-            title: "Examination Items Added",
-            description: `${itemsAddedCount} item(s) from the Examination Guide have been added.`,
-            duration: 4000,
-          });
-        }
-        
-        localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
-
       } catch (e) {
-        console.error("Error processing pending examination sins:", e);
+        console.error("Error parsing pending examination sins from localStorage:", e);
         localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
+        return;
       }
+      
+      const currentSinsRaw = localStorage.getItem(LOCAL_STORAGE_SINS_KEY);
+      let currentSins: Sin[] = [];
+      if (currentSinsRaw) {
+        try {
+          const parsedCurrentSins = JSON.parse(currentSinsRaw);
+          if (Array.isArray(parsedCurrentSins)) {
+              currentSins = parsedCurrentSins;
+          }
+        } catch (e) {
+          console.error("Error parsing current sins from localStorage:", e);
+          // currentSins remains []
+        }
+      }
+      
+      let updatedSinsList = [...currentSins];
+      let itemsAddedCount = 0;
+
+      pendingSinsTitles.forEach(title => {
+        const sinDetails = {
+          title,
+          type: 'Custom' as Sin['type'], // Explicitly type as 'Custom'
+          description: 'From Examination Guide',
+          tags: ['examination']
+        };
+
+        const isAlreadyAdded = updatedSinsList.some(
+          s => s.title === sinDetails.title && s.description === sinDetails.description && s.type === 'Custom'
+        );
+
+        if (!isAlreadyAdded) {
+          const newSinEntry: Sin = {
+            ...sinDetails,
+            id: crypto.randomUUID(),
+            addedAt: new Date().toISOString(),
+            count: 1,
+          };
+          updatedSinsList.unshift(newSinEntry); // Add to the beginning
+          itemsAddedCount++;
+        }
+      });
+
+      if (itemsAddedCount > 0) {
+        updatedSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+        setSins(updatedSinsList); // This should correctly update the state
+        setToastInfo({
+          title: "Examination Items Added",
+          description: `${itemsAddedCount} item(s) from the Examination Guide have been added to your list.`,
+          duration: 4000,
+        });
+      }
+      
+      localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
     };
 
     if(isAuthenticated){ 
+        // Run once on initial load if authenticated
         processPendingExaminationSins(); 
+        
+        // Also run on window focus to catch items added from other tabs/windows of the app
         const handleFocus = () => processPendingExaminationSins();
         window.addEventListener('focus', handleFocus);
         return () => {
           window.removeEventListener('focus', handleFocus);
         };
     }
-  }, [isAuthenticated, setSins, setToastInfo]); 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, setSins]); // Removed setToastInfo from deps as it's stable from useToast
 
   const removeSin = (sinId: string) => {
     let removedSinTitle = "The item";
