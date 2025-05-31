@@ -8,7 +8,7 @@ import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
 import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
@@ -25,7 +25,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 
@@ -45,7 +44,7 @@ export default function ConfessEaseApp() {
   const { isAuthenticated, isPasswordSet, isLoading, logout } = useAuth();
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
-  const { toast } = useToast(); // Direct useToast
+  const { toast } = useToast(); 
   const [toastInfo, setToastInfo] = useState<ToastInfo | null>(null);
 
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
@@ -53,7 +52,6 @@ export default function ConfessEaseApp() {
 
 
   useEffect(() => {
-    // Check if the disclaimer has been shown before
     const disclaimerShown = localStorage.getItem('securityDisclaimerShown');
     if (isPasswordSet && !disclaimerShown) {
       setShowSecurityDisclaimer(true);
@@ -68,7 +66,7 @@ export default function ConfessEaseApp() {
 
   useEffect(() => {
     if (toastInfo) {
-      toast({ // Direct call to toast function from useToast
+      toast({ 
         title: toastInfo.title,
         description: toastInfo.description,
         duration: toastInfo.duration,
@@ -77,7 +75,7 @@ export default function ConfessEaseApp() {
     }
   }, [toastInfo, toast]);
 
-  const addSin = (sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
+  const addSin = useCallback((sinDetails: Omit<Sin, 'id' | 'addedAt' | 'count'>) => {
     let newToastTitle = "Sin Added";
     let newToastDescription = `"${sinDetails.title.substring(0,50)}..." has been added to your list.`;
 
@@ -111,38 +109,80 @@ export default function ConfessEaseApp() {
       setToastInfo({ title: newToastTitle, description: newToastDescription });
       return newSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
     });
-  };
+  }, [setSins, setToastInfo]);
 
   useEffect(() => {
     const processPendingExaminationSins = () => {
       const pendingSinsRaw = localStorage.getItem(TEMP_EXAMINATION_SINS_KEY);
-      if (pendingSinsRaw) {
-        try {
-          const pendingSinsTitles: string[] = JSON.parse(pendingSinsRaw);
-          if (Array.isArray(pendingSinsTitles) && pendingSinsTitles.length > 0) {
-            pendingSinsTitles.forEach(title => {
-              addSin({ 
-                title, 
-                type: 'Custom', 
-                description: 'From Examination Guide', 
-                tags: ['examination'] 
-              });
-            });
-            localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
-             setToastInfo({
-              title: "Examination Items Added",
-              description: `${pendingSinsTitles.length} item(s) from the Examination Guide have been added to your list.`,
-              duration: 4000,
-            });
-          }
-        } catch (e) {
-          console.error("Error processing pending examination sins:", e);
-          localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY); 
+      if (!pendingSinsRaw) return;
+
+      try {
+        const pendingSinsTitles: string[] = JSON.parse(pendingSinsRaw);
+        if (!Array.isArray(pendingSinsTitles) || pendingSinsTitles.length === 0) {
+          localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
+          return;
         }
+
+        const currentSinsRaw = localStorage.getItem(LOCAL_STORAGE_SINS_KEY);
+        let currentSins: Sin[] = [];
+        if (currentSinsRaw) {
+          try {
+            const parsedCurrentSins = JSON.parse(currentSinsRaw);
+            if (Array.isArray(parsedCurrentSins)) {
+                currentSins = parsedCurrentSins;
+            }
+          } catch (e) {
+            console.error("Error parsing current sins from localStorage:", e);
+            // currentSins remains []
+          }
+        }
+        
+        let updatedSinsList = [...currentSins];
+        let itemsAddedCount = 0;
+
+        pendingSinsTitles.forEach(title => {
+          const sinDetails = {
+            title,
+            type: 'Custom' as Sin['type'],
+            description: 'From Examination Guide',
+            tags: ['examination']
+          };
+
+          const isAlreadyAdded = updatedSinsList.some(
+            s => s.title === sinDetails.title && s.description === sinDetails.description && s.type === 'Custom'
+          );
+
+          if (!isAlreadyAdded) {
+            const newSinEntry: Sin = {
+              ...sinDetails,
+              id: crypto.randomUUID(),
+              addedAt: new Date().toISOString(),
+              count: 1,
+            };
+            updatedSinsList.unshift(newSinEntry);
+            itemsAddedCount++;
+          }
+        });
+
+        if (itemsAddedCount > 0) {
+          updatedSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+          setSins(updatedSinsList);
+          setToastInfo({
+            title: "Examination Items Added",
+            description: `${itemsAddedCount} item(s) from the Examination Guide have been added.`,
+            duration: 4000,
+          });
+        }
+        
+        localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
+
+      } catch (e) {
+        console.error("Error processing pending examination sins:", e);
+        localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
       }
     };
 
-    if(isAuthenticated){ // Only process if authenticated
+    if(isAuthenticated){ 
         processPendingExaminationSins(); 
         const handleFocus = () => processPendingExaminationSins();
         window.addEventListener('focus', handleFocus);
@@ -150,8 +190,7 @@ export default function ConfessEaseApp() {
           window.removeEventListener('focus', handleFocus);
         };
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]); 
+  }, [isAuthenticated, setSins, setToastInfo]); 
 
   const removeSin = (sinId: string) => {
     let removedSinTitle = "The item";
@@ -216,7 +255,6 @@ export default function ConfessEaseApp() {
                 onOpenChange={setShowForgotPasswordDialog}
                 onPasswordResetSuccess={() => {
                     setShowForgotPasswordDialog(false); 
-                    // LoginDialog should now grant access as isAuthenticated will be true
                 }}
             />
         }
@@ -235,10 +273,10 @@ export default function ConfessEaseApp() {
               </AlertDialogTitle>
               <AlertDialogDescription className="space-y-3 text-left">
                 <p>
-                  Welcome to ConfessEase! For your privacy, this app uses a local password stored directly in your browser.
+                  Welcome to ConfessEase! For your privacy, this app uses a local password stored directly on your device.
                 </p>
                 <p>
-                  <strong>Please be aware:</strong> This method provides a basic layer of privacy against casual access if someone else uses your device. However, it is <strong>not a cryptographically secure system</strong> like a typical online account. A technically skilled person with access to your device or browser data could potentially bypass this protection.
+                  <strong>Please be aware:</strong> This method provides a basic layer of privacy against casual access if someone else uses your device. However, it is <strong>not a cryptographically secure system</strong> like a typical online account. A technically skilled person with access to your device's data could potentially bypass this protection.
                 </p>
                 <p>
                   Your password and security question answer are stored as plain text in local storage for this prototype. In a production application, this data would be securely hashed.
@@ -336,7 +374,7 @@ export default function ConfessEaseApp() {
               <TikTokIcon />
             </a>
             <a href="https://www.youtube.com/@moroccanchristians" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors">
-              <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Youtube className="h-5 w-5 sm:h-6 sm-w-6" />
             </a>
           </div>
         </div>
@@ -347,7 +385,6 @@ export default function ConfessEaseApp() {
             onOpenChange={setShowForgotPasswordDialog}
             onPasswordResetSuccess={() => {
                 setShowForgotPasswordDialog(false); 
-                // User is auto-logged in by resetPasswordWithSecurityAnswer
             }}
         />
     </div>
