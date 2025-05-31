@@ -1,11 +1,14 @@
 
-import type {Metadata, Viewport} from 'next';
-import {Geist, Geist_Mono} from 'next/font/google';
+// REMOVED "use client"; -- RootLayout is now a Server Component
+
+import type { Metadata, Viewport } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/AuthContext';
-import React, { useEffect } from 'react';
+import React from 'react'; // Removed useEffect import from here
+import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar'; // Import the new component
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -18,19 +21,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'My Catholic App - ConfessEase',
+  title: 'ConfessEase - Catholic Reflection Aid',
   description: 'A private app for Catholic confession preparation and reflection.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icons/icon-192x192.png', // Standard favicon
-    apple: '/icons/icon-192x192.png', // Apple touch icon
+    icon: '/icons/icon-192x192.png',
+    apple: '/icons/icon-192x192.png',
   },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#210 20% 12%' }, // Example dark theme color
+    { media: '(prefers-color-scheme: light)', color: '#77B5FE' },
+    { media: '(prefers-color-scheme: dark)', color: '#210 20% 12%' },
   ],
   colorScheme: 'light dark',
   initialScale: 1,
@@ -47,14 +50,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then((registration) => console.log('Service Worker Registered. Scope:', registration.scope))
-        .catch(error => console.error('SW registration failed:', error));
-    }
-  }, []);
+  // useEffect for service worker registration is now in ServiceWorkerRegistrar component
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -62,6 +58,10 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        {/* Viewport meta is handled by Next.js 'viewport' export above */}
+        {/* theme-color meta is handled by Next.js 'viewport' export above */}
+        {/* manifest link is handled by Next.js 'metadata' export above */}
+        {/* favicons are handled by Next.js 'metadata' export above */}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
         <AuthProvider>
@@ -70,6 +70,7 @@ export default function RootLayout({
             <Toaster />
           </ThemeProvider>
         </AuthProvider>
+        <ServiceWorkerRegistrar /> {/* Add the client component here */}
       </body>
     </html>
   );
