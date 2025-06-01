@@ -4,60 +4,60 @@
   "description": "A private app for Catholic confession preparation and reflection.",
   "icons": [
     {
-      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "src": "https://www.iconarchive.com/download/i66168/designbolts/religious-symbol/Cross-Fitchy.128.png",
+      "sizes": "128x128",
+      "type": "image/png"
     },
     {
-      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/icon-512x512.png",
+      "src": "https://www.iconarchive.com/download/i66168/designbolts/religious-symbol/Cross-Fitchy.512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/icon-maskable-512x512.png",
+      "src": "https://www.iconarchive.com/download/i66168/designbolts/religious-symbol/Cross-Fitchy.512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/512x512-monochrome.png",
+      "src": "https://www.iconarchive.com/download/i66168/designbolts/religious-symbol/Cross-Fitchy.512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "monochrome"
     }
   ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F5DC",
+  "theme_color": "#77B5FE",
+  "orientation": "portrait",
+  "id": "/",
+  "scope": "/",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "screenshots": [
     {
-      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/screenshots/screenshot1.png",
+      "src": "/screenshots/screenshot1.png",
       "sizes": "1080x1920",
       "type": "image/png",
-      "label": "Home Screen"
+      "label": "Main Screen"
     },
     {
-      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/screenshots/screenshot2-wide.png",
+      "src": "/screenshots/screenshot2-wide.png",
       "sizes": "1920x1080",
       "type": "image/png",
+      "form_factor": "wide",
       "label": "Examination Guide"
     }
   ],
-  "start_url": "/",
-  "id": "/",
-  "scope": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#F5F5DC",
-  "theme_color": "#77B5FE",
   "categories": [
     "lifestyle",
     "utilities",
-    "personalization"
+    "religion",
+    "spirituality"
   ],
   "dir": "ltr",
   "lang": "en",
-  "prefer_related_applications": false,
-  "launch_handler": {
-    "client_mode": "focus-existing"
-  }
+  "prefer_related_applications": false
 }
