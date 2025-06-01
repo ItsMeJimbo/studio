@@ -6,7 +6,7 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing, Wand2 } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import PasswordSetupDialog from "./PasswordSetupDialog";
 import LoginDialog from "./LoginDialog";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
-import ReflectionHelperDialog from "./ReflectionHelperDialog"; // Import the new dialog
+// Removed import for ReflectionHelperDialog
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +55,7 @@ export default function ConfessEaseApp() {
 
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
   const [showSecurityDisclaimer, setShowSecurityDisclaimer] = useState(false);
-  const [isReflectionHelperOpen, setIsReflectionHelperOpen] = useState(false); // State for the new dialog
+  // Removed isReflectionHelperOpen state
 
 
   // Initialize Firebase App
@@ -80,13 +80,13 @@ export default function ConfessEaseApp() {
             console.log('Notification permission granted.');
             
             const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; // VAPID key is set
-            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') { // Check for placeholder
+            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') { 
                 console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
                 toast({
-                    title: "Push Notification Error",
-                    description: "VAPID Key for push notifications is not configured correctly. Please contact support or check setup.",
+                    title: "Push Notification Setup Error",
+                    description: "VAPID Key for push notifications is not configured correctly. Notifications will not work. Please contact support or check setup documentation.",
                     variant: "destructive",
-                    duration: 10000,
+                    duration: 10000, 
                 });
                 return; 
             }
@@ -413,9 +413,7 @@ export default function ConfessEaseApp() {
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
-            <Button variant="outline" className="w-auto" onClick={() => setIsReflectionHelperOpen(true)}>
-                <Wand2 className="mr-2 h-5 w-5" /> AI Helper
-            </Button>
+            {/* Removed AI Helper button */}
             <Link href="/examination" passHref>
               <Button variant="outline" className="w-auto">
                 <BookOpenCheck className="mr-2 h-5 w-5" /> Examination
@@ -502,12 +500,11 @@ export default function ConfessEaseApp() {
                 setShowForgotPasswordDialog(false);
             }}
         />
-        <ReflectionHelperDialog
-            isOpen={isReflectionHelperOpen}
-            onOpenChange={setIsReflectionHelperOpen}
-        />
+        {/* Removed ReflectionHelperDialog rendering */}
     </div>
   );
 }
+
+    
 
     
