@@ -6,11 +6,11 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, Heart, CalendarClock, Info, BellRing, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import Link from 'next/link';
+// import { Button } from "@/components/ui/button"; // No longer needed for header nav
+// import Link from 'next/link'; // No longer needed for header nav
 import { format, parseISO } from 'date-fns';
 import { useAuth } from "@/context/AuthContext";
 import PasswordSetupDialog from "./PasswordSetupDialog";
@@ -20,7 +20,6 @@ import ForgotPasswordDialog from "./ForgotPasswordDialog";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -47,7 +46,7 @@ interface ToastInfo {
 }
 
 export default function ConfessEaseApp() {
-  const { isAuthenticated, isPasswordSet, isLoading, logout } = useAuth();
+  const { isAuthenticated, isPasswordSet, isLoading } = useAuth(); // Removed logout from here
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
   const { toast } = useToast();
@@ -78,8 +77,7 @@ export default function ConfessEaseApp() {
           if (permission === 'granted') {
             console.log('Notification permission granted.');
             
-            // VAPID key from Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates
-            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; // <<<< UPDATED!
+            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; 
             
             if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE' || vapidKey === 'YOUR_VAPID_KEY_HERE') { 
                 console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
@@ -111,12 +109,16 @@ export default function ConfessEaseApp() {
             }
           } else {
             console.log('Unable to get permission to notify.');
-             toast({
-                title: "Notifications Disabled",
-                description: "You have not granted permission for notifications.",
-                variant: "default",
-                duration: 5000,
-            });
+            const alreadyShown = sessionStorage.getItem('notificationPermissionToastShown');
+            if (!alreadyShown) {
+                toast({
+                    title: "Notifications Disabled",
+                    description: "You have not granted permission for notifications. You can enable them in browser settings.",
+                    variant: "default",
+                    duration: 7000,
+                });
+                sessionStorage.setItem('notificationPermissionToastShown', 'true');
+            }
           }
 
           // --- Handle Foreground Messages ---
@@ -129,6 +131,7 @@ export default function ConfessEaseApp() {
                 title: notificationTitle,
                 description: notificationBody,
                 duration: 7000,
+                variant: "default", // Ensure a variant is specified for foreground messages
             });
           });
 
@@ -369,7 +372,7 @@ export default function ConfessEaseApp() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col font-sans">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col font-sans">
       {showSecurityDisclaimer && (
         <AlertDialog open={showSecurityDisclaimer} onOpenChange={setShowSecurityDisclaimer}>
           <AlertDialogContent>
@@ -407,31 +410,7 @@ export default function ConfessEaseApp() {
               ConfessEase
             </h1>
           </div>
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
-            <Link href="/examination" passHref>
-              <Button variant="outline" className="w-auto">
-                <BookOpenCheck className="mr-2 h-5 w-5" /> Examination
-              </Button>
-            </Link>
-            <Link href="/prayers" passHref>
-              <Button variant="outline" className="w-auto">
-                <BookText className="mr-2 h-5 w-5" /> Prayers
-              </Button>
-            </Link>
-            <Link href="/resources" passHref>
-              <Button variant="outline" className="w-auto">
-                <BookMarked className="mr-2 h-5 w-5" /> Resources
-              </Button>
-            </Link>
-             <Link href="/settings" passHref>
-              <Button variant="outline" className="w-auto">
-                <SettingsIcon className="mr-2 h-5 w-5" /> Settings
-              </Button>
-            </Link>
-            <Button variant="ghost" size="sm" onClick={logout} className="text-muted-foreground hover:text-destructive w-auto">
-                <LogOut className="mr-2 h-5 w-5" /> Logout
-            </Button>
-          </div>
+          {/* Header navigation buttons removed */}
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-4 text-center sm:text-left max-w-xl mx-auto sm:mx-0">
           A peaceful space for personal reflection and spiritual preparation. All data is stored locally on your device.

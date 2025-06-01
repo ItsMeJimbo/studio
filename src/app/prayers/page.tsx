@@ -1,16 +1,14 @@
 
 "use client";
 
-import Link from 'next/link';
+// import Link from 'next/link'; // No longer needed for back button
 import React, { useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, BookText, Search, Frown } from 'lucide-react';
+// import { Button } from '@/components/ui/button'; // No longer needed for back button
+// import { ChevronLeft } from 'lucide-react'; // No longer needed for back button
+import { BookText, Search, Frown } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 
-// Manually define metadata for client components if needed, or set in a parent layout/page.
-// For page.tsx, metadata can be exported directly.
-// The metadata object was removed from here as it's a client component.
 
 interface Prayer {
   title: string;
@@ -109,12 +107,7 @@ export default function PrayersPage() {
             <BookText className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
             Common Prayers
           </h1>
-          <Link href="/" passHref>
-            <Button variant="outline" className="w-full sm:w-auto">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Reflection
-            </Button>
-          </Link>
+          {/* Back button removed */}
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-3 text-center sm:text-left">
           A collection of prayers to aid your reflection and spiritual practice. You can search by title, content, or keyword.

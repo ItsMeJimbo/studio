@@ -1,9 +1,11 @@
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, LinkIcon, YoutubeIcon, LandmarkIcon, BookOpenIcon, BookMarked } from 'lucide-react'; // Added BookMarked
+// import Link from 'next/link'; // No longer needed for back button
+// import { Button } from '@/components/ui/button'; // No longer needed for back button
+// import { ChevronLeft } from 'lucide-react'; // No longer needed for back button
+import { LinkIcon, YoutubeIcon, LandmarkIcon, BookOpenIcon, BookMarked } from 'lucide-react'; 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button'; // Still needed for "Visit Resource"
 
 export const metadata: Metadata = {
   title: 'Catholic Resources - ConfessEase',
@@ -52,12 +54,7 @@ export default function ResourcesPage() {
             <BookMarked className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
             Catholic Resources
           </h1>
-          <Link href="/" passHref>
-            <Button variant="outline" className="w-full sm:w-auto">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Reflection
-            </Button>
-          </Link>
+          {/* Back button removed */}
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-3 text-center sm:text-left">
           Explore these useful links for deepening your understanding of the Catholic faith.

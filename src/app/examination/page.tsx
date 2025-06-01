@@ -1,18 +1,15 @@
 
 "use client"; // Keep this as ExaminationGuideAccordion uses client features like toast
 
-import type { Metadata } from 'next'; // Metadata for server components, can be removed if not used
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, BookOpenCheck, HelpCircle } from 'lucide-react';
+// import type { Metadata } from 'next'; // Metadata for server components, can be removed if not used
+// import Link from 'next/link'; // No longer needed for back button
+// import { Button } from '@/components/ui/button'; // No longer needed for back button
+// import { ChevronLeft } from 'lucide-react'; // No longer needed for back button
+import { BookOpenCheck, HelpCircle } from 'lucide-react';
 import { ExaminationGuideAccordion } from '@/components/ExaminationGuideAccordion';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// export const metadata: Metadata = { // Metadata cannot be exported from client components
-//   title: 'Examination of Conscience - ConfessEase',
-//   description: 'A guide to help you reflect on your actions.',
-// };
 
 export default function ExaminationPage() {
   return (
@@ -23,12 +20,7 @@ export default function ExaminationPage() {
             <BookOpenCheck className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
             Examination of Conscience
           </h1>
-          <Link href="/" passHref>
-            <Button variant="outline" className="w-full sm:w-auto">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Reflection
-            </Button>
-          </Link>
+          {/* Back button removed */}
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-3 text-center sm:text-left">
           This guide is designed to help you reflect on your actions in light of Catholic teachings. Use this tool to prepare your heart. Click the (+) icon next to an item to queue it for addition to your reflection list on the main page.

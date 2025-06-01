@@ -1,9 +1,10 @@
 
 "use client";
 
-import Link from 'next/link';
+// import Link from 'next/link'; // No longer needed for back button
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, SettingsIcon, Palette, Trash2, Check, KeyRound, ShieldQuestion, Lock } from 'lucide-react';
+// import { ChevronLeft } from 'lucide-react'; // No longer needed for back button
+import { SettingsIcon, Palette, Trash2, Check, KeyRound, ShieldQuestion, Lock, LogOut } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useTheme } from '@/components/ThemeProvider';
@@ -41,7 +42,7 @@ type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
-  const { changePassword, resetApp, isPasswordSet } = useAuth();
+  const { changePassword, resetApp, isPasswordSet, logout } = useAuth(); // Added logout
 
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
   const [isResetAppDialogOpen, setIsResetAppDialogOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function SettingsPage() {
   });
 
   const handleTriggerResetAppDialog = () => {
-    if (!isClientMounted) return; // Prevent action if not mounted
+    if (!isClientMounted) return; 
     setIsResetAppDialogOpen(true);
   };
 
@@ -74,7 +75,7 @@ export default function SettingsPage() {
   const handleResetAppConfirm = () => {
     resetApp();
     setIsResetAppDialogOpen(false);
-    setTheme("system");
+    setTheme("system"); 
   };
 
   const dataManagementDescriptionText = isClientMounted ? (isPasswordSet ? "your password settings." : "any locally stored data.") : "...";
@@ -89,12 +90,7 @@ export default function SettingsPage() {
             <SettingsIcon className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
             Settings
           </h1>
-          <Link href="/" passHref>
-            <Button variant="outline" className="w-full sm:w-auto">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Reflection
-            </Button>
-          </Link>
+          {/* Back button removed */}
         </div>
          <p className="text-sm sm:text-base text-muted-foreground mt-3 text-center sm:text-left">
           Manage your application preferences and security here.
@@ -139,16 +135,22 @@ export default function SettingsPage() {
             <p className="text-muted-foreground mb-3">
               Manage your application password. Remember, this password is local to this browser.
             </p>
-            <Button onClick={() => setIsChangePasswordDialogOpen(true)}>
-              <KeyRound className="mr-2 h-4 w-4" />
-              Change Password
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={() => setIsChangePasswordDialogOpen(true)}>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Change Password
+                </Button>
+                 <Button variant="outline" onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                </Button>
+            </div>
             <p className="text-xs text-muted-foreground mt-2">
                 If you've forgotten your password, log out and use the "Forgot Password" option on the login screen.
             </p>
           </section>
         )}
-        {!isClientMounted && ( // Placeholder for Security section if password might be set
+        {!isClientMounted && ( 
             <section className="p-6 border rounded-lg shadow-sm bg-card">
                 <div className="flex items-center gap-3 mb-4">
                   <Lock className="h-6 w-6 text-primary" />
@@ -168,7 +170,7 @@ export default function SettingsPage() {
                 <Trash2 className="h-6 w-6 text-destructive" />
                 <h2 className="text-xl font-semibold text-foreground">Data Management</h2>
             </div>
-            <p className="text-muted-foreground mb-3">
+             <p className="text-muted-foreground mb-3">
                 Permanently remove all your app data stored in this browser. This includes your sin list, last confession date, theme preferences, and {dataManagementDescriptionText} This action cannot be undone.
             </p>
             <Button
@@ -178,7 +180,7 @@ export default function SettingsPage() {
               disabled={!isClientMounted}
             >
                 <Trash2 className="mr-2 h-4 w-4 shrink-0" />
-                <span>{resetAppButtonText}</span>
+                <span>{isClientMounted ? resetAppButtonText : "Loading..."}</span>
             </Button>
         </section>
       </main>
@@ -254,4 +256,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

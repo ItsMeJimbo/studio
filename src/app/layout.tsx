@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/AuthContext';
 import React from 'react'; // Removed useEffect import from here
 import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar'; // Import the new component
+import BottomNavigationBar from '@/components/BottomNavigationBar';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -32,8 +33,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#77B5FE' },
-    { media: '(prefers-color-scheme: dark)', color: '#210 20% 12%' },
+    { media: '(prefers-color-scheme: light)', color: '#F5F5DC' }, // Updated to match new theme bg
+    { media: '(prefers-color-scheme: dark)', color: '#2F2B23' }, // Updated to match new theme bg
   ],
   colorScheme: 'light dark',
   initialScale: 1,
@@ -63,10 +64,13 @@ export default function RootLayout({
         {/* manifest link is handled by Next.js 'metadata' export above */}
         {/* favicons are handled by Next.js 'metadata' export above */}
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased pb-16 sm:pb-0`} suppressHydrationWarning={true}>
         <AuthProvider>
           <ThemeProvider>
-            {children}
+            <div className="flex min-h-screen flex-col">
+              <main className="flex-grow">{children}</main>
+              <BottomNavigationBar />
+            </div>
             <Toaster />
           </ThemeProvider>
         </AuthProvider>
