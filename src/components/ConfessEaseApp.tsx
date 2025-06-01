@@ -6,7 +6,7 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing, Wand2 } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,9 @@ export default function ConfessEaseApp() {
           if (permission === 'granted') {
             console.log('Notification permission granted.');
             
-            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg';
+            // VAPID key from Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates
+            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; // <<<< UPDATED!
+            
             if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE' || vapidKey === 'YOUR_VAPID_KEY_HERE') { 
                 console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
                 toast({
@@ -91,10 +93,10 @@ export default function ConfessEaseApp() {
             }
 
             const currentToken = await getToken(messaging, { vapidKey }).catch(err => {
-              console.error('An error occurred while retrieving FCM token. ', err);
+              console.error('An error occurred while retrieving FCM token. Is your VAPID key correct and are you on HTTPS? ', err);
               toast({
                   title: "FCM Token Error",
-                  description: "Could not get push notification token. Check VAPID key. Error: " + (err.message || err.code || 'Unknown error'),
+                  description: "Could not get push notification token. Check VAPID key and ensure site is on HTTPS. Error: " + (err.message || err.code || 'Unknown error'),
                   variant: "destructive",
                   duration: 10000,
               });
@@ -208,7 +210,7 @@ export default function ConfessEaseApp() {
         newSinsList = [newSinEntry, ...prevSins];
       }
 
-      setToastInfo({ title: newToastTitle, description: newToastDescription, duration: 5000 });
+      setToastInfo({ title: newToastTitle, description: newToastDescription, duration: 3000 });
       return newSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
     });
   }, [setSins, setToastInfo]);
@@ -308,7 +310,7 @@ export default function ConfessEaseApp() {
     setToastInfo({
       title: "Sin Removed",
       description: `${removedSinTitle} has been removed from your list.`,
-      duration: 5000,
+      duration: 3000,
     });
   };
 
@@ -326,7 +328,7 @@ export default function ConfessEaseApp() {
       setToastInfo({
         title: "List Cleared",
         description: "Your list has been cleared for a new reflection.",
-        duration: 5000,
+        duration: 3000,
       });
     }
   };
