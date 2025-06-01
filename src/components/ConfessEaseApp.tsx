@@ -6,7 +6,7 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import PasswordSetupDialog from "./PasswordSetupDialog";
 import LoginDialog from "./LoginDialog";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
-// Removed import for ReflectionHelperDialog
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,11 +55,10 @@ export default function ConfessEaseApp() {
 
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
   const [showSecurityDisclaimer, setShowSecurityDisclaimer] = useState(false);
-  // Removed isReflectionHelperOpen state
 
 
   // Initialize Firebase App
-  let app: FirebaseApp | undefined; // Ensure app can be undefined initially
+  let app: FirebaseApp | undefined;
   if (typeof window !== 'undefined') {
     if (getApps().length === 0) {
       app = initializeApp(firebaseConfig);
@@ -79,12 +78,12 @@ export default function ConfessEaseApp() {
           if (permission === 'granted') {
             console.log('Notification permission granted.');
             
-            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; // VAPID key is set
-            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') { 
+            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg';
+            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE' || vapidKey === 'YOUR_VAPID_KEY_HERE') { 
                 console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
                 toast({
                     title: "Push Notification Setup Error",
-                    description: "VAPID Key for push notifications is not configured correctly. Notifications will not work. Please contact support or check setup documentation.",
+                    description: "VAPID Key for push notifications is not configured correctly. Notifications will not work.",
                     variant: "destructive",
                     duration: 10000, 
                 });
@@ -95,7 +94,7 @@ export default function ConfessEaseApp() {
               console.error('An error occurred while retrieving FCM token. ', err);
               toast({
                   title: "FCM Token Error",
-                  description: "Could not get push notification token. Check console & VAPID key setup. Error: " + (err.message || err.code || 'Unknown error'),
+                  description: "Could not get push notification token. Check VAPID key. Error: " + (err.message || err.code || 'Unknown error'),
                   variant: "destructive",
                   duration: 10000,
               });
@@ -151,7 +150,7 @@ export default function ConfessEaseApp() {
       return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, isPasswordSet, app]); // 'app' is added to dependency array
+  }, [isAuthenticated, isPasswordSet, app]);
 
 
   useEffect(() => {
@@ -244,22 +243,20 @@ export default function ConfessEaseApp() {
           }
         } catch (e) {
           console.error("Error parsing current sins from localStorage:", e);
-          // Do not setSins([]) here, as it might overwrite sins loaded by useLocalStorageState
         }
       }
 
-      let updatedSinsList = [...currentSins]; // Start with a copy of current sins
+      let updatedSinsList = [...currentSins];
       let itemsAddedCount = 0;
 
       pendingSinsTitles.forEach(title => {
         const sinDetails = {
           title,
-          type: 'Custom' as Sin['type'], // Explicitly type 'Custom'
+          type: 'Custom' as Sin['type'],
           description: 'From Examination Guide',
           tags: ['examination']
         };
 
-        // Check if a sin with the exact same title and description (from examination) already exists
         const isAlreadyAdded = updatedSinsList.some(
           s => s.title === sinDetails.title && s.description === sinDetails.description && s.type === 'Custom'
         );
@@ -271,15 +268,13 @@ export default function ConfessEaseApp() {
             addedAt: new Date().toISOString(),
             count: 1,
           };
-          updatedSinsList.unshift(newSinEntry); // Add to the beginning
+          updatedSinsList.unshift(newSinEntry);
           itemsAddedCount++;
         }
       });
 
       if (itemsAddedCount > 0) {
         updatedSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
-        // Only call setSins if there were actual changes to avoid unnecessary re-renders
-        // And to ensure we are setting the merged list correctly.
         setSins(updatedSinsList);
         setToastInfo({
           title: "Examination Items Added",
@@ -291,17 +286,15 @@ export default function ConfessEaseApp() {
       localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
     };
 
-    if(isAuthenticated){ // Only process if authenticated
+    if(isAuthenticated){
         processPendingExaminationSins();
-
-        // Also process on window focus to catch items added while tab was inactive
         const handleFocus = () => processPendingExaminationSins();
         window.addEventListener('focus', handleFocus);
         return () => {
           window.removeEventListener('focus', handleFocus);
         };
     }
-  }, [isAuthenticated, setSins]); // Make sure setSins is a dependency
+  }, [isAuthenticated, setSins]);
 
   const removeSin = (sinId: string) => {
     let removedSinTitle = "The item";
@@ -404,7 +397,7 @@ export default function ConfessEaseApp() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      <header className="mb-10">
+      <header className="pb-6 mb-6 border-b">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <Church className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
@@ -413,7 +406,6 @@ export default function ConfessEaseApp() {
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
-            {/* Removed AI Helper button */}
             <Link href="/examination" passHref>
               <Button variant="outline" className="w-auto">
                 <BookOpenCheck className="mr-2 h-5 w-5" /> Examination
@@ -500,11 +492,6 @@ export default function ConfessEaseApp() {
                 setShowForgotPasswordDialog(false);
             }}
         />
-        {/* Removed ReflectionHelperDialog rendering */}
     </div>
   );
 }
-
-    
-
-    
