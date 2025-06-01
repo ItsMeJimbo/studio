@@ -6,7 +6,7 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, BookOpenCheck, Heart, BookText, CalendarClock, SettingsIcon, BookMarked, LogOut, ShieldAlert, Info, BellRing, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import PasswordSetupDialog from "./PasswordSetupDialog";
 import LoginDialog from "./LoginDialog";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
+import ReflectionHelperDialog from "./ReflectionHelperDialog"; // Import the new dialog
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,6 +55,7 @@ export default function ConfessEaseApp() {
 
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
   const [showSecurityDisclaimer, setShowSecurityDisclaimer] = useState(false);
+  const [isReflectionHelperOpen, setIsReflectionHelperOpen] = useState(false); // State for the new dialog
 
 
   // Initialize Firebase App
@@ -76,21 +78,17 @@ export default function ConfessEaseApp() {
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
             console.log('Notification permission granted.');
-
-            // --- Get FCM Token ---
-            // CRITICAL: Replace 'YOUR_VAPID_KEY_HERE' with your actual VAPID key from
-            // Firebase Project Settings > Cloud Messaging > Web configuration > Web Push certificates
-            // Without a valid VAPID key, token generation will fail silently or error.
-            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; // <<<< THIS HAS BEEN UPDATED
-            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') { // Keep a very distinct placeholder
+            
+            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg';
+            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') {
                 console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
                 toast({
                     title: "Push Notification Error",
                     description: "VAPID Key for push notifications is not configured correctly. Please contact support or check setup.",
                     variant: "destructive",
-                    duration: 10000, // Longer duration for important errors
+                    duration: 10000,
                 });
-                return; // Stop if VAPID key is the placeholder
+                return; 
             }
 
             const currentToken = await getToken(messaging, { vapidKey }).catch(err => {
@@ -415,6 +413,9 @@ export default function ConfessEaseApp() {
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
+            <Button variant="outline" className="w-auto" onClick={() => setIsReflectionHelperOpen(true)}>
+                <Wand2 className="mr-2 h-5 w-5" /> AI Helper
+            </Button>
             <Link href="/examination" passHref>
               <Button variant="outline" className="w-auto">
                 <BookOpenCheck className="mr-2 h-5 w-5" /> Examination
@@ -501,7 +502,10 @@ export default function ConfessEaseApp() {
                 setShowForgotPasswordDialog(false);
             }}
         />
+        <ReflectionHelperDialog
+            isOpen={isReflectionHelperOpen}
+            onOpenChange={setIsReflectionHelperOpen}
+        />
     </div>
   );
 }
-
