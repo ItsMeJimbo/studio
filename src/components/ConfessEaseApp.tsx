@@ -57,7 +57,7 @@ export default function ConfessEaseApp() {
 
 
   // Initialize Firebase App
-  let app: FirebaseApp;
+  let app: FirebaseApp | undefined; // Ensure app can be undefined initially
   if (typeof window !== 'undefined') {
     if (getApps().length === 0) {
       app = initializeApp(firebaseConfig);
@@ -81,25 +81,25 @@ export default function ConfessEaseApp() {
             // CRITICAL: Replace 'YOUR_VAPID_KEY_HERE' with your actual VAPID key from
             // Firebase Project Settings > Cloud Messaging > Web configuration > Web Push certificates
             // Without a valid VAPID key, token generation will fail silently or error.
-            const vapidKey = 'YOUR_VAPID_KEY_HERE'; // <<<< IMPORTANT: REPLACE THIS!
-            if (vapidKey === 'YOUR_VAPID_KEY_HERE') {
-                console.error("FCM VAPID Key is not set. Please set it in ConfessEaseApp.tsx to enable push notifications.");
+            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; // <<<< THIS HAS BEEN UPDATED
+            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') { // Keep a very distinct placeholder
+                console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
                 toast({
                     title: "Push Notification Error",
-                    description: "VAPID Key for push notifications is not configured.",
+                    description: "VAPID Key for push notifications is not configured correctly. Please contact support or check setup.",
                     variant: "destructive",
-                    duration: 7000,
+                    duration: 10000, // Longer duration for important errors
                 });
-                return; // Stop if VAPID key is not set
+                return; // Stop if VAPID key is the placeholder
             }
 
             const currentToken = await getToken(messaging, { vapidKey }).catch(err => {
-              console.error('An error occurred while retrieving token. ', err);
+              console.error('An error occurred while retrieving FCM token. ', err);
               toast({
                   title: "FCM Token Error",
-                  description: "Could not get push notification token. See console for details.",
+                  description: "Could not get push notification token. Check console & VAPID key setup. Error: " + (err.message || err.code || 'Unknown error'),
                   variant: "destructive",
-                  duration: 7000,
+                  duration: 10000,
               });
               return null;
             });
@@ -108,7 +108,7 @@ export default function ConfessEaseApp() {
               console.log('FCM Token:', currentToken);
               // TODO: Send this token to your server to send push notifications to this device
             } else {
-              console.log('No registration token available. Request permission to generate one, or check VAPID key.');
+              console.log('No registration token available. Request permission to generate one, or check VAPID key configuration and browser console for errors.');
             }
           } else {
             console.log('Unable to get permission to notify.');
@@ -133,11 +133,11 @@ export default function ConfessEaseApp() {
             });
           });
 
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error setting up Firebase Messaging:', error);
            toast({
               title: "Messaging Error",
-              description: "Could not initialize push notifications.",
+              description: "Could not initialize push notifications. Error: " + (error.message || 'Unknown error'),
               variant: "destructive",
               duration: 7000,
           });
@@ -153,7 +153,7 @@ export default function ConfessEaseApp() {
       return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, isPasswordSet, app]);
+  }, [isAuthenticated, isPasswordSet, app]); // 'app' is added to dependency array
 
 
   useEffect(() => {
@@ -246,20 +246,22 @@ export default function ConfessEaseApp() {
           }
         } catch (e) {
           console.error("Error parsing current sins from localStorage:", e);
+          // Do not setSins([]) here, as it might overwrite sins loaded by useLocalStorageState
         }
       }
 
-      let updatedSinsList = [...currentSins];
+      let updatedSinsList = [...currentSins]; // Start with a copy of current sins
       let itemsAddedCount = 0;
 
       pendingSinsTitles.forEach(title => {
         const sinDetails = {
           title,
-          type: 'Custom' as Sin['type'],
+          type: 'Custom' as Sin['type'], // Explicitly type 'Custom'
           description: 'From Examination Guide',
           tags: ['examination']
         };
 
+        // Check if a sin with the exact same title and description (from examination) already exists
         const isAlreadyAdded = updatedSinsList.some(
           s => s.title === sinDetails.title && s.description === sinDetails.description && s.type === 'Custom'
         );
@@ -271,13 +273,15 @@ export default function ConfessEaseApp() {
             addedAt: new Date().toISOString(),
             count: 1,
           };
-          updatedSinsList.unshift(newSinEntry);
+          updatedSinsList.unshift(newSinEntry); // Add to the beginning
           itemsAddedCount++;
         }
       });
 
       if (itemsAddedCount > 0) {
         updatedSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+        // Only call setSins if there were actual changes to avoid unnecessary re-renders
+        // And to ensure we are setting the merged list correctly.
         setSins(updatedSinsList);
         setToastInfo({
           title: "Examination Items Added",
@@ -289,16 +293,17 @@ export default function ConfessEaseApp() {
       localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
     };
 
-    if(isAuthenticated){
+    if(isAuthenticated){ // Only process if authenticated
         processPendingExaminationSins();
 
+        // Also process on window focus to catch items added while tab was inactive
         const handleFocus = () => processPendingExaminationSins();
         window.addEventListener('focus', handleFocus);
         return () => {
           window.removeEventListener('focus', handleFocus);
         };
     }
-  }, [isAuthenticated, setSins]);
+  }, [isAuthenticated, setSins]); // Make sure setSins is a dependency
 
   const removeSin = (sinId: string) => {
     let removedSinTitle = "The item";
@@ -499,3 +504,4 @@ export default function ConfessEaseApp() {
     </div>
   );
 }
+
