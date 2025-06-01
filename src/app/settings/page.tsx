@@ -19,9 +19,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, LOCAL_STORAGE_THEME_KEY } from "@/lib/constants";
 import { useAuth } from '@/context/AuthContext';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,6 +45,11 @@ export default function SettingsPage() {
 
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
   const [isResetAppDialogOpen, setIsResetAppDialogOpen] = useState(false);
+  const [isClientMounted, setIsClientMounted] = useState(false);
+
+  useEffect(() => {
+    setIsClientMounted(true);
+  }, []);
 
   const { control: changePasswordControl, handleSubmit: handleChangePasswordSubmit, reset: resetChangePasswordForm, formState: { errors: changePasswordErrors } } = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
@@ -53,6 +57,7 @@ export default function SettingsPage() {
   });
 
   const handleTriggerResetAppDialog = () => {
+    if (!isClientMounted) return; // Prevent action if not mounted
     setIsResetAppDialogOpen(true);
   };
 
@@ -71,6 +76,9 @@ export default function SettingsPage() {
     setIsResetAppDialogOpen(false);
     setTheme("system");
   };
+
+  const dataManagementDescriptionText = isClientMounted ? (isPasswordSet ? "your password settings." : "any locally stored data.") : "...";
+  const resetAppButtonText = isClientMounted ? (isPasswordSet ? "Reset Entire App (Clear All Data & Password)" : "Clear All App Data") : "Loading...";
 
 
   return (
@@ -122,7 +130,7 @@ export default function SettingsPage() {
             </RadioGroup>
         </section>
 
-        {isPasswordSet && (
+        {isClientMounted && isPasswordSet && (
           <section className="p-6 border rounded-lg shadow-sm bg-card">
             <div className="flex items-center gap-3 mb-4">
               <Lock className="h-6 w-6 text-primary" />
@@ -140,6 +148,20 @@ export default function SettingsPage() {
             </p>
           </section>
         )}
+        {!isClientMounted && ( // Placeholder for Security section if password might be set
+            <section className="p-6 border rounded-lg shadow-sm bg-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <Lock className="h-6 w-6 text-primary" />
+                  <h2 className="text-xl font-semibold text-foreground">Security</h2>
+                </div>
+                <p className="text-muted-foreground mb-3">Loading security options...</p>
+                 <Button disabled>
+                    <KeyRound className="mr-2 h-4 w-4" />
+                    Loading...
+                </Button>
+            </section>
+        )}
+
 
         <section className="p-6 border rounded-lg shadow-sm bg-card">
             <div className="flex items-center gap-3 mb-4">
@@ -147,15 +169,16 @@ export default function SettingsPage() {
                 <h2 className="text-xl font-semibold text-foreground">Data Management</h2>
             </div>
             <p className="text-muted-foreground mb-3">
-                Permanently remove all your app data stored in this browser. This includes your sin list, last confession date, theme preferences, and {isPasswordSet ? "your password settings." : "any locally stored data."} This action cannot be undone.
+                Permanently remove all your app data stored in this browser. This includes your sin list, last confession date, theme preferences, and {dataManagementDescriptionText} This action cannot be undone.
             </p>
             <Button
               variant="destructive"
               onClick={handleTriggerResetAppDialog}
               className="w-full sm:w-auto h-auto py-2.5 px-4 text-center whitespace-normal leading-normal"
+              disabled={!isClientMounted}
             >
                 <Trash2 className="mr-2 h-4 w-4 shrink-0" />
-                <span>{isPasswordSet ? "Reset Entire App (Clear All Data & Password)" : "Clear All App Data"}</span>
+                <span>{resetAppButtonText}</span>
             </Button>
         </section>
       </main>
@@ -231,3 +254,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+
