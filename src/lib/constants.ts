@@ -54,6 +54,11 @@ export const PREDEFINED_SINS_DATA: {
     { id: 'v23', title: 'Being stubborn or unwilling to admit fault.', keywords: ['obstinacy', 'hard-headed'] },
     { id: 'v24', title: 'Neglecting one\'s health or well-being through minor carelessness.', keywords: ['poor self-care'] },
     { id: 'v25', title: 'Showing disrespect to sacred places or objects (minor).', keywords: ['slight irreverence'] },
+    { id: 'v26', title: 'Minor impatience in traffic or queues.', keywords: ['road rage (mild)', 'line cutting thoughts'] },
+    { id: 'v27', title: 'Excessive complaining about minor inconveniences.', keywords: ['whining', 'nitpicking'] },
+    { id: 'v28', title: 'Slight exaggeration to make a story more interesting (not a harmful lie).', keywords: ['storytelling flourish', 'embellishment'] },
+    { id: 'v29', title: 'Failing to return borrowed items promptly without good reason.', keywords: ['keeping borrowed things', 'forgetfulness with others property'] },
+    { id: 'v30', title: 'Giving in to distractions during prayer or important tasks.', keywords: ['wandering mind', 'lack of focus', 'texting during mass'] },
   ],
   Mortal: [
     { id: 'm1', title: 'Deliberately missing Mass on Sunday or a Holy Day of Obligation without a serious reason', keywords: ['skipping church', 'neglecting Mass obligation'] },
@@ -81,5 +86,13 @@ export const PREDEFINED_SINS_DATA: {
     { id: 'm23', title: 'Deliberate and consensual entertaining of lustful thoughts about a specific person not one\'s spouse, if consent is given to the desire itself.', keywords: ['lustful thoughts (deliberate, consensual, grave)'] },
     { id: 'm24', title: 'Drunkenness or substance abuse that leads to loss of reason or serious neglect of duties.', keywords: ['grave intoxication', 'serious addiction impacting duties'] },
     { id: 'm25', title: 'Mutilation or serious self-harm.', keywords: ['grave self-harm'] },
+    { id: 'm26', title: 'Willful destruction or desecration of significant Church property or sacred objects.', keywords: ['vandalism of church', 'sacrilege of objects'] },
+    { id: 'm27', title: 'Incest (sexual relations between close relatives).', keywords: ['family sexual abuse'] },
+    { id: 'm28', title: 'Formal cooperation in the grave sin of another (e.g., driving someone to an abortion clinic knowing their intent).', keywords: ['accomplice to grave sin', 'material cooperation (formal)'] },
+    { id: 'm29', title: 'Deliberately endangering the life of another through reckless actions without just cause (e.g., extreme drunk driving).', keywords: ['reckless endangerment (grave)'] },
+    { id: 'm30', title: 'Participation in Freemasonry or other societies forbidden by the Church due to their opposition to Catholic faith or morals.', keywords: ['forbidden societies', 'anti-church groups'] },
   ],
 };
+
+
+    
