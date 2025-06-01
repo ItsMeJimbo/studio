@@ -32,7 +32,7 @@ export default function SinItemCard({ sin, onRemoveSin }: SinItemCardProps) {
 
   return (
     <Card className="overflow-hidden shadow-md transition-all hover:shadow-lg">
-      <CardHeader className="pb-3">
+      <CardHeader className="px-3 pt-3 pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-grow min-w-0">
             <CardTitle className="text-lg leading-tight break-words">
@@ -66,7 +66,7 @@ export default function SinItemCard({ sin, onRemoveSin }: SinItemCardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="text-sm space-y-3">
+      <CardContent className="px-3 pb-3 pt-0 text-sm space-y-3">
         {sin.description && (
           <p className="text-muted-foreground leading-relaxed break-words">{sin.description}</p>
         )}
