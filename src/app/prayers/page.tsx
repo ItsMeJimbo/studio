@@ -1,19 +1,19 @@
 
 "use client";
 
-// import Link from 'next/link'; // No longer needed for back button
-import React, { useState, useMemo } from 'react';
-// import { Button } from '@/components/ui/button'; // No longer needed for back button
-// import { ChevronLeft } from 'lucide-react'; // No longer needed for back button
-import { BookText, Search, Frown } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { BookText, Search, Frown, Info } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { getCurrentLiturgicalSeason, type LiturgicalSeasonInfo } from '@/lib/liturgicalYear';
 
 
 interface Prayer {
   title: string;
   text: string[];
   keywords?: string[];
+  tags?: string[]; // e.g., ['contrition', 'marian', 'daily']
 }
 
 const allPrayers: Prayer[] = [
@@ -24,7 +24,8 @@ const allPrayers: Prayer[] = [
       "I firmly resolve, with the help of Thy grace, to confess my sins, to do penance, and to amend my life.",
       "Amen."
     ],
-    keywords: ["sorrow", "forgiveness", "amend life", "penance"]
+    keywords: ["sorrow", "forgiveness", "amend life", "penance"],
+    tags: ["contrition", "essential", "lent", "anytime"]
   },
   {
     title: "Our Father (The Lord's Prayer)",
@@ -33,7 +34,8 @@ const allPrayers: Prayer[] = [
       "Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil.",
       "Amen."
     ],
-    keywords: ["Lord's Prayer", "forgive trespasses", "daily bread", "kingdom come"]
+    keywords: ["Lord's Prayer", "forgive trespasses", "daily bread", "kingdom come"],
+    tags: ["essential", "daily", "anytime"]
   },
   {
     title: "Hail Mary",
@@ -42,7 +44,8 @@ const allPrayers: Prayer[] = [
       "Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death.",
       "Amen."
     ],
-    keywords: ["Ave Maria", "Mother of God", "blessed fruit"]
+    keywords: ["Ave Maria", "Mother of God", "blessed fruit"],
+    tags: ["marian", "daily", "anytime", "advent", "christmas"]
   },
   {
     title: "Glory Be (Doxology)",
@@ -51,7 +54,8 @@ const allPrayers: Prayer[] = [
       "as it was in the beginning, is now, and ever shall be, world without end.",
       "Amen."
     ],
-    keywords: ["Trinity", "praise", "eternal"]
+    keywords: ["Trinity", "praise", "eternal"],
+    tags: ["praise", "daily", "anytime"]
   },
   {
     title: "Nicene Creed",
@@ -62,7 +66,8 @@ const allPrayers: Prayer[] = [
       "I believe in the Holy Spirit, the Lord, the giver of life, who proceeds from the Father and the Son, who with the Father and the Son is adored and glorified, who has spoken through the prophets.",
       "I believe in one, holy, catholic and apostolic Church. I confess one Baptism for the forgiveness of sins and I look forward to the resurrection of the dead and the life of the world to come. Amen."
     ],
-    keywords: ["faith", "Trinity", "Jesus Christ", "Holy Spirit", "Church", "resurrection", "credo"]
+    keywords: ["faith", "Trinity", "Jesus Christ", "Holy Spirit", "Church", "resurrection", "credo"],
+    tags: ["faith", "essential", "sunday", "easter"]
   },
   {
     title: "Hail Holy Queen (Salve Regina)",
@@ -71,7 +76,8 @@ const allPrayers: Prayer[] = [
       "Turn then, most gracious Advocate, thine eyes of mercy toward us, and after this our exile, show unto us the blessed fruit of thy womb, Jesus.",
       "O clement, O loving, O sweet Virgin Mary! Pray for us, O holy Mother of God, that we may be made worthy of the promises of Christ. Amen."
     ],
-    keywords: ["Mary", "Mother of Mercy", "Advocate", "Salve Regina"]
+    keywords: ["Mary", "Mother of Mercy", "Advocate", "Salve Regina"],
+    tags: ["marian", "anytime", "advent"]
   },
   {
     title: "Prayer to St. Michael the Archangel",
@@ -79,13 +85,54 @@ const allPrayers: Prayer[] = [
       "Saint Michael the Archangel, defend us in battle. Be our protection against the wickedness and snares of the devil; May God rebuke him, we humbly pray; And do thou, O Prince of the Heavenly Host, by the power of God, cast into hell Satan and all evil spirits who wander through the world seeking the ruin of souls.",
       "Amen."
     ],
-    keywords: ["St. Michael", "Archangel", "protection", "devil", "battle", "evil spirits"]
+    keywords: ["St. Michael", "Archangel", "protection", "devil", "battle", "evil spirits"],
+    tags: ["protection", "spiritual warfare", "anytime"]
+  },
+  {
+    title: "Come, Holy Spirit",
+    text: [
+        "Come, Holy Spirit, fill the hearts of Your faithful and kindle in them the fire of Your love.",
+        "V. Send forth Your Spirit, and they shall be created.",
+        "R. And You shall renew the face of the earth.",
+        "Let us pray. O God, Who by the light of the Holy Spirit, did instruct the hearts of the faithful, grant that by the same Holy Spirit we may be truly wise and ever rejoice in His consolations. Through Christ Our Lord. Amen."
+    ],
+    keywords: ["Holy Spirit", "Veni Sancte Spiritus", "guidance", "wisdom"],
+    tags: ["Holy Spirit", "pentecost", "easter", "guidance", "anytime"]
   }
 ];
 
 
 export default function PrayersPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentSeasonInfo, setCurrentSeasonInfo] = useState<LiturgicalSeasonInfo | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentSeasonInfo(getCurrentLiturgicalSeason());
+    }
+  }, []);
+
+  const getSeasonalPrayerHint = (): { title: string; prayers: string[] } | null => {
+    if (!currentSeasonInfo) return null;
+    switch (currentSeasonInfo.name) {
+      case "Advent":
+        return { title: "Prayers for Advent", prayers: ["Hail Mary", "Hail Holy Queen"] };
+      case "Christmas Time":
+        return { title: "Prayers for Christmas", prayers: ["Hail Mary", "Glory Be"] };
+      case "Lent":
+        return { title: "Prayers for Lent", prayers: ["Act of Contrition", "Our Father"] };
+      case "Easter Time":
+        return { title: "Prayers for Easter", prayers: ["Nicene Creed", "Come, Holy Spirit", "Glory Be"] };
+      case "Pentecost Sunday":
+        return { title: "Prayers for Pentecost", prayers: ["Come, Holy Spirit", "Glory Be"] };
+      case "Ordinary Time":
+        return { title: "Prayers for Daily Life", prayers: ["Our Father", "Hail Mary", "Glory Be", "Act of Contrition"] };
+      default:
+        return { title: "General Prayers", prayers: ["Our Father", "Hail Mary"] };
+    }
+  };
+  const seasonalHint = getSeasonalPrayerHint();
+
 
   const filteredPrayers = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -107,7 +154,6 @@ export default function PrayersPage() {
             <BookText className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
             Common Prayers
           </h1>
-          {/* Back button removed */}
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-3 text-center sm:text-left">
           A collection of prayers to aid your reflection and spiritual practice. You can search by title, content, or keyword.
@@ -123,9 +169,21 @@ export default function PrayersPage() {
           />
         </div>
       </header>
+      
+      {currentSeasonInfo && seasonalHint && (
+        <Alert className="mb-6 border-primary/30 bg-primary/5">
+          <Info className="h-5 w-5 text-primary" />
+          <AlertTitle className="font-semibold text-primary">
+            {seasonalHint.title} ({currentSeasonInfo.name})
+          </AlertTitle>
+          <AlertDescription className="text-muted-foreground">
+            Consider focusing on prayers like: {seasonalHint.prayers.join(', ')}.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <main className="flex-grow">
-        <ScrollArea className="h-[calc(100vh-300px)] sm:h-[calc(100vh-280px)] rounded-md border p-1 sm:p-4">
+        <ScrollArea className="h-[calc(100vh-360px)] sm:h-[calc(100vh-340px)] rounded-md border p-1 sm:p-4">
            {filteredPrayers.length > 0 ? (
               <div className="space-y-8 pb-4 pr-2">
                 {filteredPrayers.map((prayer, prayerIndex) => (

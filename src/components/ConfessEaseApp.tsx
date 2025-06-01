@@ -6,16 +6,16 @@ import { LOCAL_STORAGE_SINS_KEY, LOCAL_STORAGE_LAST_CONFESSION_KEY, TEMP_EXAMINA
 import useLocalStorageState from "@/hooks/useLocalStorageState";
 import SelectSinSection from "./SelectSinSection";
 import MySinsSection from "./MySinsSection";
-import { Church, Instagram, Twitter, Facebook, Youtube, Heart, CalendarClock, Info, BellRing, ShieldAlert } from "lucide-react";
+import { Church, Instagram, Twitter, Facebook, Youtube, Heart, CalendarClock, Info, BellRing, ShieldAlert, Milestone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useCallback } from "react";
-// import { Button } from "@/components/ui/button"; // No longer needed for header nav
-// import Link from 'next/link'; // No longer needed for header nav
 import { format, parseISO } from 'date-fns';
 import { useAuth } from "@/context/AuthContext";
 import PasswordSetupDialog from "./PasswordSetupDialog";
 import LoginDialog from "./LoginDialog";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
+import { getCurrentLiturgicalSeason, type LiturgicalSeasonInfo } from '@/lib/liturgicalYear';
+
 
 import {
   AlertDialog,
@@ -46,11 +46,13 @@ interface ToastInfo {
 }
 
 export default function ConfessEaseApp() {
-  const { isAuthenticated, isPasswordSet, isLoading } = useAuth(); // Removed logout from here
+  const { isAuthenticated, isPasswordSet, isLoading } = useAuth();
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
   const { toast } = useToast();
   const [toastInfo, setToastInfo] = useState<ToastInfo | null>(null);
+  const [currentSeasonInfo, setCurrentSeasonInfo] = useState<LiturgicalSeasonInfo | null>(null);
+
 
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
   const [showSecurityDisclaimer, setShowSecurityDisclaimer] = useState(false);
@@ -66,6 +68,12 @@ export default function ConfessEaseApp() {
     }
   }
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentSeasonInfo(getCurrentLiturgicalSeason());
+    }
+  }, []);
+
   // FCM Setup Effect
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.Notification && isAuthenticated && app) {
@@ -75,40 +83,51 @@ export default function ConfessEaseApp() {
 
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
-            console.log('Notification permission granted.');
+            // console.log('Notification permission granted.'); // Keep for debugging if needed
             
-            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; 
+            // VAPID key from Firebase project settings > Cloud Messaging > Web configuration
+            const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE'; 
             
-            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE' || vapidKey === 'YOUR_VAPID_KEY_HERE') { 
-                console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
-                toast({
-                    title: "Push Notification Setup Error",
-                    description: "VAPID Key for push notifications is not configured correctly. Notifications will not work.",
-                    variant: "destructive",
-                    duration: 10000, 
-                });
+             if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE' || !vapidKey) { 
+                console.error("FCM VAPID Key is a placeholder or missing. Please set NEXT_PUBLIC_FIREBASE_VAPID_KEY in your .env.local and ensure it's in Firebase project settings.");
+                const vapidToastShown = sessionStorage.getItem('vapidKeyErrorToastShown');
+                if (!vapidToastShown) {
+                    toast({
+                        title: "Push Notification Setup Error",
+                        description: "VAPID Key for push notifications is not configured. Notifications may not work. See console for details.",
+                        variant: "destructive",
+                        duration: 10000, 
+                    });
+                    sessionStorage.setItem('vapidKeyErrorToastShown', 'true');
+                }
                 return; 
             }
 
+
             const currentToken = await getToken(messaging, { vapidKey }).catch(err => {
               console.error('An error occurred while retrieving FCM token. Is your VAPID key correct and are you on HTTPS? ', err);
-              toast({
-                  title: "FCM Token Error",
-                  description: "Could not get push notification token. Check VAPID key and ensure site is on HTTPS. Error: " + (err.message || err.code || 'Unknown error'),
-                  variant: "destructive",
-                  duration: 10000,
-              });
+              // Avoid spamming toasts for token errors if they are persistent
+              const tokenErrorToastShown = sessionStorage.getItem('fcmTokenErrorToastShown');
+              if (!tokenErrorToastShown) {
+                toast({
+                    title: "FCM Token Error",
+                    description: "Could not get push notification token. Check VAPID key, HTTPS, and console. Error: " + (err.message || err.code || 'Unknown error'),
+                    variant: "destructive",
+                    duration: 10000,
+                });
+                sessionStorage.setItem('fcmTokenErrorToastShown', 'true');
+              }
               return null;
             });
 
             if (currentToken) {
-              console.log('FCM Token:', currentToken);
+              // console.log('FCM Token:', currentToken); // Keep for debugging
               // TODO: Send this token to your server to send push notifications to this device
             } else {
-              console.log('No registration token available. Request permission to generate one, or check VAPID key configuration and browser console for errors.');
+              // console.log('No registration token available. Request permission or check VAPID/API key.'); // Keep for debugging
             }
           } else {
-            console.log('Unable to get permission to notify.');
+            // console.log('Unable to get permission to notify.'); // Keep for debugging
             const alreadyShown = sessionStorage.getItem('notificationPermissionToastShown');
             if (!alreadyShown) {
                 toast({
@@ -123,7 +142,7 @@ export default function ConfessEaseApp() {
 
           // --- Handle Foreground Messages ---
           onMessage(messaging, (payload) => {
-            console.log('Message received in foreground. ', payload);
+            // console.log('Message received in foreground. ', payload); // Keep for debugging
             const notificationTitle = payload.notification?.title || "New Message";
             const notificationBody = payload.notification?.body || "You have a new message.";
 
@@ -131,18 +150,22 @@ export default function ConfessEaseApp() {
                 title: notificationTitle,
                 description: notificationBody,
                 duration: 7000,
-                variant: "default", // Ensure a variant is specified for foreground messages
+                variant: "default",
             });
           });
 
         } catch (error: any) {
           console.error('Error setting up Firebase Messaging:', error);
-           toast({
-              title: "Messaging Error",
-              description: "Could not initialize push notifications. Error: " + (error.message || 'Unknown error'),
-              variant: "destructive",
-              duration: 7000,
-          });
+           const messagingErrorToastShown = sessionStorage.getItem('fcmMessagingErrorToastShown');
+           if (!messagingErrorToastShown) {
+                toast({
+                    title: "Messaging Error",
+                    description: "Could not initialize push notifications. Error: " + (error.message || 'Unknown error'),
+                    variant: "destructive",
+                    duration: 7000,
+                });
+                sessionStorage.setItem('fcmMessagingErrorToastShown', 'true');
+           }
         }
       };
 
@@ -150,12 +173,12 @@ export default function ConfessEaseApp() {
         if (isPasswordSet && isAuthenticated) {
             initFCM();
         }
-      }, 3000);
+      }, 3000); // Delay FCM init slightly
 
       return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, isPasswordSet, app]);
+  }, [isAuthenticated, isPasswordSet, app]); // app dependency is important
 
 
   useEffect(() => {
@@ -381,19 +404,21 @@ export default function ConfessEaseApp() {
                 <ShieldAlert className="h-6 w-6 text-destructive" />
                 Important Security Notice
               </AlertDialogTitle>
-              <AlertDialogDescription className="space-y-3 text-left">
-                <p>
-                  Welcome to ConfessEase! For your privacy, this app uses a local password stored directly on your device.
-                </p>
-                <p>
-                  <strong>Please be aware:</strong> This method provides a basic layer of privacy against casual access if someone else uses your device. However, it is <strong>not a cryptographically secure system</strong> like a typical online account. A technically skilled person with access to your device's data could potentially bypass this protection.
-                </p>
-                <p>
-                  Your password and security question answer are stored as plain text in local storage for this prototype. In a production application, this data would be securely hashed.
-                </p>
-                <p>
-                  Do not use a highly sensitive password that you use for other critical accounts.
-                </p>
+               <AlertDialogDescription asChild>
+                <div className="space-y-3 text-left text-sm text-muted-foreground">
+                  <p>
+                    Welcome to ConfessEase! For your privacy, this app uses a local password stored directly on your device.
+                  </p>
+                  <p>
+                    <strong>Please be aware:</strong> This method provides a basic layer of privacy against casual access if someone else uses your device. However, it is <strong>not a cryptographically secure system</strong> like a typical online account. A technically skilled person with access to your device's data could potentially bypass this protection.
+                  </p>
+                  <p>
+                    Your password and security question answer are stored as plain text in local storage for this prototype. In a production application, this data would be securely hashed.
+                  </p>
+                  <p>
+                    Do not use a highly sensitive password that you use for other critical accounts.
+                  </p>
+                </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -410,14 +435,25 @@ export default function ConfessEaseApp() {
               ConfessEase
             </h1>
           </div>
-          {/* Header navigation buttons removed */}
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mt-4 text-center sm:text-left max-w-xl mx-auto sm:mx-0">
           A peaceful space for personal reflection and spiritual preparation. All data is stored locally on your device.
         </p>
-        <div className="mt-4 text-sm text-center sm:text-left text-muted-foreground flex items-center gap-2 justify-center sm:justify-start">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            <span>Last Confession: <strong>{formattedLastConfessionDate}</strong></span>
+        <div className="mt-4 text-sm text-center sm:text-left text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
+            <div className="flex items-center gap-2">
+                <CalendarClock className="h-4 w-4 text-primary" />
+                <span>Last Confession: <strong>{formattedLastConfessionDate}</strong></span>
+            </div>
+            {currentSeasonInfo && (
+              <div className="flex items-center gap-2 text-xs sm:text-sm sm:ml-4 border-l sm:pl-4 mt-1 sm:mt-0 pt-1 sm:pt-0 border-t sm:border-t-0 sm:border-l-muted">
+                <Milestone className="h-4 w-4 text-primary" />
+                <div>
+                  <span>Current Season: <strong>{currentSeasonInfo.name}</strong> </span>
+                  <span className="block sm:inline text-xs text-muted-foreground/80">({currentSeasonInfo.description})</span>
+                   {currentSeasonInfo.dateRange && <span className="block text-xs text-muted-foreground/70">({currentSeasonInfo.dateRange})</span>}
+                </div>
+              </div>
+            )}
         </div>
       </header>
 
@@ -464,7 +500,7 @@ export default function ConfessEaseApp() {
             </a>
           </div>
         </div>
-        <p className="mt-8">&copy; 2025 ConfessEase. 100% Private and Offline.</p>
+        <p className="mt-8">&copy; {new Date().getFullYear()} ConfessEase. 100% Private and Offline.</p>
       </footer>
        <ForgotPasswordDialog
             isOpen={showForgotPasswordDialog}
