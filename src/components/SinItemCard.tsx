@@ -2,7 +2,7 @@
 "use client";
 
 import type { Sin } from '@/types';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from 'date-fns';
@@ -16,7 +16,7 @@ interface SinItemCardProps {
 const TypeIcon = ({ type }: { type: Sin['type'] }) => {
   switch (type) {
     case 'Venial':
-      return <Feather className="h-4 w-4 text-blue-500" />; // Icon size can be h-4 for more compactness
+      return <Feather className="h-4 w-4 text-blue-500" />;
     case 'Mortal':
       return <ShieldAlert className="h-4 w-4 text-red-500" />;
     case 'Custom':
@@ -34,33 +34,33 @@ export default function SinItemCard({ sin, onRemoveSin }: SinItemCardProps) {
     <Card className="overflow-hidden shadow-md transition-all hover:shadow-lg">
       <CardHeader className="px-3 pt-3 pb-2">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-grow min-w-0"> {/* Title container */}
-            <CardTitle className="text-base leading-snug break-words"> {/* Reduced text size & line height */}
+          <div className="flex-grow min-w-0">
+            <CardTitle className="text-base leading-snug break-words">
               {sin.title}
               {sin.count && sin.count > 1 && (
-                <span className="ml-1 text-xs font-normal text-muted-foreground">(x{sin.count})</span> {/* Smaller margin & text */}
+                <span className="ml-1 text-xs font-normal text-muted-foreground">(x{sin.count})</span>
               )}
             </CardTitle>
           </div>
-          <div className="flex items-center shrink-0"> {/* Badge and Remove button container */}
+          <div className="flex items-center shrink-0">
             <Badge
               variant={sin.type === 'Mortal' ? 'destructive' : sin.type === 'Venial' ? 'secondary' : 'default'}
-              className="shrink-0" /* Removed ml-2 */
+              className="shrink-0"
             >
-               <div className="flex items-center gap-1"> {/* Reduced gap */}
+               <div className="flex items-center gap-1">
                   <TypeIcon type={sin.type} />
-                  <span className="text-xs">{sin.type}</span> {/* Explicitly smaller text for badge type */}
+                  <span className="text-xs">{sin.type}</span>
                </div>
             </Badge>
             {onRemoveSin && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-1.5 h-7 w-7 text-muted-foreground hover:text-destructive shrink-0" /* Reduced ml, added shrink-0 */
+                className="ml-1.5 h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
                 onClick={() => onRemoveSin(sin.id)}
                 aria-label="Remove sin"
               >
-                <Trash2 className="h-4 w-4 shrink-0" /> {/* Ensured icon is shrink-0 */}
+                <Trash2 className="h-4 w-4 shrink-0" />
               </Button>
             )}
           </div>
@@ -74,7 +74,7 @@ export default function SinItemCard({ sin, onRemoveSin }: SinItemCardProps) {
           <div className="flex flex-wrap gap-2 items-center">
             <Tag className="h-4 w-4 text-muted-foreground" />
             {sin.tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="font-normal text-xs px-1.5 py-0.5">{tag}</Badge> /* Smaller tag badges */
+              <Badge key={index} variant="outline" className="font-normal text-xs px-1.5 py-0.5">{tag}</Badge>
             ))}
           </div>
         )}
