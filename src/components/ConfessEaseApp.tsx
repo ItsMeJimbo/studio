@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 // Firebase imports
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { firebaseConfig } from '@/lib/firebaseConfig';
 
@@ -49,7 +49,7 @@ export default function ConfessEaseApp() {
   const { isAuthenticated, isPasswordSet, isLoading, logout } = useAuth();
   const [sins, setSins] = useLocalStorageState<Sin[]>(LOCAL_STORAGE_SINS_KEY, []);
   const [lastConfessionDate, setLastConfessionDate] = useLocalStorageState<string | null>(LOCAL_STORAGE_LAST_CONFESSION_KEY, null);
-  const { toast } = useToast(); 
+  const { toast } = useToast();
   const [toastInfo, setToastInfo] = useState<ToastInfo | null>(null);
 
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
@@ -57,33 +57,58 @@ export default function ConfessEaseApp() {
 
 
   // Initialize Firebase App
-  if (typeof window !== 'undefined' && getApps().length === 0) {
-    initializeApp(firebaseConfig);
-    // You can also initialize other Firebase services here if needed
+  let app: FirebaseApp;
+  if (typeof window !== 'undefined') {
+    if (getApps().length === 0) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApp();
+    }
   }
-  
+
   // FCM Setup Effect
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.Notification && isAuthenticated) {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.Notification && isAuthenticated && app) {
       const initFCM = async () => {
         try {
-          const messaging = getMessaging(getApp()); // Get the initialized app
+          const messaging = getMessaging(app);
 
-          // --- Request Notification Permission ---
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
             console.log('Notification permission granted.');
 
             // --- Get FCM Token ---
-            // TODO: Replace 'YOUR_VAPID_KEY_HERE' with your actual VAPID key from Firebase Console
-            // (Firebase Project Settings > Cloud Messaging > Web configuration > Web Push certificates)
-            const currentToken = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' });
+            // CRITICAL: Replace 'YOUR_VAPID_KEY_HERE' with your actual VAPID key from
+            // Firebase Project Settings > Cloud Messaging > Web configuration > Web Push certificates
+            // Without a valid VAPID key, token generation will fail silently or error.
+            const vapidKey = 'YOUR_VAPID_KEY_HERE'; // <<<< IMPORTANT: REPLACE THIS!
+            if (vapidKey === 'YOUR_VAPID_KEY_HERE') {
+                console.error("FCM VAPID Key is not set. Please set it in ConfessEaseApp.tsx to enable push notifications.");
+                toast({
+                    title: "Push Notification Error",
+                    description: "VAPID Key for push notifications is not configured.",
+                    variant: "destructive",
+                    duration: 7000,
+                });
+                return; // Stop if VAPID key is not set
+            }
+
+            const currentToken = await getToken(messaging, { vapidKey }).catch(err => {
+              console.error('An error occurred while retrieving token. ', err);
+              toast({
+                  title: "FCM Token Error",
+                  description: "Could not get push notification token. See console for details.",
+                  variant: "destructive",
+                  duration: 7000,
+              });
+              return null;
+            });
+
             if (currentToken) {
               console.log('FCM Token:', currentToken);
-              // Send this token to your server to send push notifications to this device
-              // For this app, we're just logging it.
+              // TODO: Send this token to your server to send push notifications to this device
             } else {
-              console.log('No registration token available. Request permission to generate one.');
+              console.log('No registration token available. Request permission to generate one, or check VAPID key.');
             }
           } else {
             console.log('Unable to get permission to notify.');
@@ -100,13 +125,12 @@ export default function ConfessEaseApp() {
             console.log('Message received in foreground. ', payload);
             const notificationTitle = payload.notification?.title || "New Message";
             const notificationBody = payload.notification?.body || "You have a new message.";
-            
+
             toast({
                 title: notificationTitle,
                 description: notificationBody,
-                duration: 7000, // Keep it on screen a bit longer
+                duration: 7000,
             });
-            // You could also display a custom in-app notification UI here
           });
 
         } catch (error) {
@@ -115,22 +139,21 @@ export default function ConfessEaseApp() {
               title: "Messaging Error",
               description: "Could not initialize push notifications.",
               variant: "destructive",
+              duration: 7000,
           });
         }
       };
 
-      // Delay FCM initialization slightly to ensure other critical parts of the app have loaded
-      // and to avoid potential race conditions with service worker registrations.
       const timer = setTimeout(() => {
-        if (isPasswordSet && isAuthenticated) { // Only init if user is fully logged in
+        if (isPasswordSet && isAuthenticated) {
             initFCM();
         }
-      }, 3000); 
-      
+      }, 3000);
+
       return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, isPasswordSet]); // Rerun if auth state changes
+  }, [isAuthenticated, isPasswordSet, app]);
 
 
   useEffect(() => {
@@ -148,12 +171,12 @@ export default function ConfessEaseApp() {
 
   useEffect(() => {
     if (toastInfo) {
-      toast({ 
+      toast({
         title: toastInfo.title,
         description: toastInfo.description,
         duration: toastInfo.duration,
       });
-      setToastInfo(null); 
+      setToastInfo(null);
     }
   }, [toastInfo, toast]);
 
@@ -163,18 +186,18 @@ export default function ConfessEaseApp() {
 
     setSins((prevSins) => {
       const existingSinIndex = prevSins.findIndex(
-        (s) => s.title === sinDetails.title && s.type === sinDetails.type && s.type !== 'Custom' 
+        (s) => s.title === sinDetails.title && s.type === sinDetails.type && s.type !== 'Custom'
       );
 
       let newSinsList;
 
-      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') { 
+      if (existingSinIndex !== -1 && sinDetails.type !== 'Custom') {
         newSinsList = prevSins.map((s, index) => {
           if (index === existingSinIndex) {
             const newCount = (s.count || 1) + 1;
             newToastTitle = "Sin Count Increased";
             newToastDescription = `Count for "${s.title.substring(0,50)}..." is now ${newCount}.`;
-            return { ...s, count: newCount, addedAt: new Date().toISOString() }; 
+            return { ...s, count: newCount, addedAt: new Date().toISOString() };
           }
           return s;
         });
@@ -185,10 +208,10 @@ export default function ConfessEaseApp() {
           addedAt: new Date().toISOString(),
           count: 1,
         };
-        newSinsList = [newSinEntry, ...prevSins]; 
+        newSinsList = [newSinEntry, ...prevSins];
       }
-      
-      setToastInfo({ title: newToastTitle, description: newToastDescription });
+
+      setToastInfo({ title: newToastTitle, description: newToastDescription, duration: 5000 });
       return newSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
     });
   }, [setSins, setToastInfo]);
@@ -212,7 +235,7 @@ export default function ConfessEaseApp() {
         localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
         return;
       }
-      
+
       const currentSinsRaw = localStorage.getItem(LOCAL_STORAGE_SINS_KEY);
       let currentSins: Sin[] = [];
       if (currentSinsRaw) {
@@ -223,17 +246,16 @@ export default function ConfessEaseApp() {
           }
         } catch (e) {
           console.error("Error parsing current sins from localStorage:", e);
-          // currentSins remains []
         }
       }
-      
+
       let updatedSinsList = [...currentSins];
       let itemsAddedCount = 0;
 
       pendingSinsTitles.forEach(title => {
         const sinDetails = {
           title,
-          type: 'Custom' as Sin['type'], // Explicitly type as 'Custom'
+          type: 'Custom' as Sin['type'],
           description: 'From Examination Guide',
           tags: ['examination']
         };
@@ -249,37 +271,34 @@ export default function ConfessEaseApp() {
             addedAt: new Date().toISOString(),
             count: 1,
           };
-          updatedSinsList.unshift(newSinEntry); // Add to the beginning
+          updatedSinsList.unshift(newSinEntry);
           itemsAddedCount++;
         }
       });
 
       if (itemsAddedCount > 0) {
         updatedSinsList.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
-        setSins(updatedSinsList); // This should correctly update the state
+        setSins(updatedSinsList);
         setToastInfo({
           title: "Examination Items Added",
           description: `${itemsAddedCount} item(s) from the Examination Guide have been added to your list.`,
           duration: 4000,
         });
       }
-      
+
       localStorage.removeItem(TEMP_EXAMINATION_SINS_KEY);
     };
 
-    if(isAuthenticated){ 
-        // Run once on initial load if authenticated
-        processPendingExaminationSins(); 
-        
-        // Also run on window focus to catch items added from other tabs/windows of the app
+    if(isAuthenticated){
+        processPendingExaminationSins();
+
         const handleFocus = () => processPendingExaminationSins();
         window.addEventListener('focus', handleFocus);
         return () => {
           window.removeEventListener('focus', handleFocus);
         };
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, setSins]); // Removed setToastInfo from deps as it's stable from useToast
+  }, [isAuthenticated, setSins]);
 
   const removeSin = (sinId: string) => {
     let removedSinTitle = "The item";
@@ -293,6 +312,7 @@ export default function ConfessEaseApp() {
     setToastInfo({
       title: "Sin Removed",
       description: `${removedSinTitle} has been removed from your list.`,
+      duration: 5000,
     });
   };
 
@@ -305,7 +325,7 @@ export default function ConfessEaseApp() {
         description: "Your list has been cleared and the date updated. May you find peace.",
         duration: 5000,
       });
-    } else { 
+    } else {
       setSins([]);
       setToastInfo({
         title: "List Cleared",
@@ -338,12 +358,12 @@ export default function ConfessEaseApp() {
   if (!isAuthenticated) {
     return <>
         <LoginDialog isOpen={true} onForgotPassword={() => setShowForgotPasswordDialog(true)} />
-        {showForgotPasswordDialog && 
-            <ForgotPasswordDialog 
-                isOpen={showForgotPasswordDialog} 
+        {showForgotPasswordDialog &&
+            <ForgotPasswordDialog
+                isOpen={showForgotPasswordDialog}
                 onOpenChange={setShowForgotPasswordDialog}
                 onPasswordResetSuccess={() => {
-                    setShowForgotPasswordDialog(false); 
+                    setShowForgotPasswordDialog(false);
                 }}
             />
         }
@@ -463,17 +483,17 @@ export default function ConfessEaseApp() {
               <TikTokIcon />
             </a>
             <a href="https://www.youtube.com/@moroccanchristians" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors">
-              <Youtube className="h-5 w-5 sm:h-6 sm-w-6" />
+              <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />
             </a>
           </div>
         </div>
         <p className="mt-8">&copy; 2025 ConfessEase. 100% Private and Offline.</p>
       </footer>
-       <ForgotPasswordDialog 
-            isOpen={showForgotPasswordDialog} 
+       <ForgotPasswordDialog
+            isOpen={showForgotPasswordDialog}
             onOpenChange={setShowForgotPasswordDialog}
             onPasswordResetSuccess={() => {
-                setShowForgotPasswordDialog(false); 
+                setShowForgotPasswordDialog(false);
             }}
         />
     </div>

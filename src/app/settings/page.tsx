@@ -42,7 +42,7 @@ type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
-  const { changePassword, resetApp, isPasswordSet } = useAuth(); // Added resetApp
+  const { changePassword, resetApp, isPasswordSet } = useAuth();
 
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
   const [isResetAppDialogOpen, setIsResetAppDialogOpen] = useState(false);
@@ -52,50 +52,24 @@ export default function SettingsPage() {
     defaultValues: { oldPassword: '', newPassword: '', confirmNewPassword: '' },
   });
 
-  const handleClearAppData = () => {
-    // This function is now part of resetApp if password is set
-    // If password is not set, it would only clear non-auth data
-    // For consistency, we use resetApp from AuthContext if a password system is in place
-    if (isPasswordSet) {
-        setIsResetAppDialogOpen(true); // Trigger the reset app dialog which uses resetApp from context
-    } else {
-        // Fallback for non-password-protected state (though less likely with new flow)
-        try {
-            localStorage.removeItem(LOCAL_STORAGE_SINS_KEY);
-            localStorage.removeItem(LOCAL_STORAGE_LAST_CONFESSION_KEY);
-            localStorage.removeItem(LOCAL_STORAGE_THEME_KEY);
-            toast({
-                title: "App Data Cleared",
-                description: "Your local data (sins, last confession, theme) has been removed.",
-            });
-            setTheme("system");
-        } catch (error) {
-            console.error("Error clearing app data:", error);
-            toast({
-                title: "Error",
-                description: "Could not clear app data. Please try again.",
-                variant: "destructive",
-            });
-        }
-    }
+  const handleTriggerResetAppDialog = () => {
+    setIsResetAppDialogOpen(true);
   };
 
   const onSubmitChangePassword = (data: ChangePasswordFormData) => {
     if (changePassword(data.oldPassword, data.newPassword)) {
-      toast({ title: "Password Changed", description: "Your password has been successfully updated." });
+      toast({ title: "Password Changed", description: "Your password has been successfully updated.", duration: 5000 });
       resetChangePasswordForm();
       setIsChangePasswordDialogOpen(false);
     } else {
-      toast({ title: "Error", description: "Incorrect old password. Please try again.", variant: "destructive" });
+      toast({ title: "Error", description: "Incorrect old password. Please try again.", variant: "destructive", duration: 5000 });
     }
   };
 
   const handleResetAppConfirm = () => {
-    resetApp(); // This will clear all data including auth and show its own toast
+    resetApp();
     setIsResetAppDialogOpen(false);
-    setTheme("system"); // Reset theme in UI
-    // Potentially redirect or force reload if needed for full reset effect
-    // window.location.href = "/"; // To re-trigger auth flow
+    setTheme("system");
   };
 
 
@@ -175,9 +149,13 @@ export default function SettingsPage() {
             <p className="text-muted-foreground mb-3">
                 Permanently remove all your app data stored in this browser. This includes your sin list, last confession date, theme preferences, and {isPasswordSet ? "your password settings." : "any locally stored data."} This action cannot be undone.
             </p>
-            <Button variant="destructive" onClick={handleClearAppData}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                {isPasswordSet ? "Reset Entire App (Clear All Data & Password)" : "Clear All App Data"}
+            <Button
+              variant="destructive"
+              onClick={handleTriggerResetAppDialog}
+              className="w-full sm:w-auto h-auto py-2.5 px-4 text-center whitespace-normal leading-normal"
+            >
+                <Trash2 className="mr-2 h-4 w-4 shrink-0" />
+                <span>{isPasswordSet ? "Reset Entire App (Clear All Data & Password)" : "Clear All App Data"}</span>
             </Button>
         </section>
       </main>

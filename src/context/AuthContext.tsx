@@ -29,6 +29,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const TOAST_DURATION = 5000; // Default duration for auth toasts
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
@@ -51,11 +53,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSecurityQuestion(storedSecurityQuestion);
         setSecurityAnswer(storedSecurityAnswer);
       } else {
-        setIsPasswordSet(false); // Explicitly set for clarity
+        setIsPasswordSet(false);
       }
     } catch (error) {
       console.error("Error loading auth data from localStorage:", error);
-      toast({ title: "Error", description: "Could not load security settings. Please try again.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not load security settings. Please try again.", variant: "destructive", duration: TOAST_DURATION });
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const setupPassword = useCallback((password: string, question: string, answer: string) => {
     try {
-      // In a real app, HASH the password and answer before storing.
-      // For this prototype, we store them directly.
       localStorage.setItem(LOCAL_STORAGE_PASSWORD_HASH_KEY, password);
       localStorage.setItem(LOCAL_STORAGE_SECURITY_QUESTION_KEY, question);
       localStorage.setItem(LOCAL_STORAGE_SECURITY_ANSWER_KEY, answer);
@@ -85,11 +85,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSecurityQuestion(question);
       setSecurityAnswer(answer);
       setIsPasswordSet(true);
-      setIsAuthenticated(true); // Log in immediately after setup
-      toast({ title: "Password Set", description: "Your password and security question have been set up." });
+      setIsAuthenticated(true);
+      toast({ title: "Password Set", description: "Your password and security question have been set up.", duration: TOAST_DURATION });
     } catch (error) {
       console.error("Error setting up password:", error);
-      toast({ title: "Error", description: "Could not set up password. Please ensure localStorage is accessible.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not set up password. Please ensure localStorage is accessible.", variant: "destructive", duration: TOAST_DURATION });
     }
   }, [toast]);
 
@@ -98,12 +98,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         localStorage.setItem(LOCAL_STORAGE_PASSWORD_HASH_KEY, newPassword);
         setPasswordHash(newPassword);
-        setIsAuthenticated(true); // Log in with new password
-        toast({ title: "Password Reset", description: "Your password has been successfully reset." });
+        setIsAuthenticated(true);
+        toast({ title: "Password Reset", description: "Your password has been successfully reset.", duration: TOAST_DURATION });
         return true;
       } catch (error) {
         console.error("Error resetting password:", error);
-        toast({ title: "Error", description: "Could not reset password.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not reset password.", variant: "destructive", duration: TOAST_DURATION });
         return false;
       }
     }
@@ -115,11 +115,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         localStorage.setItem(LOCAL_STORAGE_PASSWORD_HASH_KEY, newPassword);
         setPasswordHash(newPassword);
-        toast({ title: "Password Changed", description: "Your password has been successfully changed." });
+        toast({ title: "Password Changed", description: "Your password has been successfully changed.", duration: TOAST_DURATION });
         return true;
       } catch (error) {
         console.error("Error changing password:", error);
-        toast({ title: "Error", description: "Could not change password.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not change password.", variant: "destructive", duration: TOAST_DURATION });
         return false;
       }
     }
@@ -140,6 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem(LOCAL_STORAGE_SECURITY_QUESTION_KEY);
       localStorage.removeItem(LOCAL_STORAGE_SECURITY_ANSWER_KEY);
       localStorage.removeItem(LOCAL_STORAGE_PASSWORD_SET_KEY);
+      localStorage.removeItem('securityDisclaimerShown'); // Also clear this flag
 
       setIsAuthenticated(false);
       setIsPasswordSet(false);
@@ -150,12 +151,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast({
         title: "App Reset Successful",
         description: "All app data including your password has been cleared. Please set up a new password.",
+        duration: TOAST_DURATION + 2000, // Slightly longer for this important message
       });
-       // Could trigger a reload or redirect to ensure clean state if needed:
-       // window.location.reload();
     } catch (error) {
       console.error("Error resetting app:", error);
-      toast({ title: "Error", description: "Could not reset app data.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not reset app data.", variant: "destructive", duration: TOAST_DURATION });
     }
   }, [toast]);
 

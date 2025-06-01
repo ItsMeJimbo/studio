@@ -10,13 +10,19 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// Default duration for toasts to be visible if not specified otherwise
+const TOAST_VISIBLE_DURATION = 5000; // 5 seconds
+// Delay before a toast is actually removed from the DOM after being "closed"
+// This can be longer to allow for CSS animations to complete.
+const TOAST_REMOVE_DELAY = TOAST_VISIBLE_DURATION + 1000;
+
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  duration?: number // Allow overriding the default duration
 }
 
 const actionTypes = {
@@ -59,9 +65,9 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-const addToRemoveQueue = (toastId: string) => {
+const addToRemoveQueue = (toastId: string, duration: number) => {
   if (toastTimeouts.has(toastId)) {
-    return
+    clearTimeout(toastTimeouts.get(toastId)); // Clear existing timeout if any
   }
 
   const timeout = setTimeout(() => {
@@ -70,7 +76,7 @@ const addToRemoveQueue = (toastId: string) => {
       type: "REMOVE_TOAST",
       toastId: toastId,
     })
-  }, TOAST_REMOVE_DELAY)
+  }, duration) // Use the provided duration, or the TOAST_REMOVE_DELAY if not
 
   toastTimeouts.set(toastId, timeout)
 }
@@ -94,13 +100,15 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
-        addToRemoveQueue(toastId)
+        // Find the toast to get its specific duration for removal, or use default
+        const toastToDismiss = state.toasts.find(t => t.id === toastId);
+        const removeDelay = toastToDismiss?.duration ?? TOAST_REMOVE_DELAY;
+        addToRemoveQueue(toastId, removeDelay);
       } else {
+        // Dismiss all, use default remove delay for each
         state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
+          addToRemoveQueue(toast.id, toast.duration ?? TOAST_REMOVE_DELAY);
         })
       }
 
@@ -143,7 +151,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast({ ...props }: Toast) {
+function toast({ duration = TOAST_VISIBLE_DURATION, ...props }: Toast) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -159,11 +167,18 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
+      duration, // Pass duration to the toast state
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
     },
   })
+
+  // Auto-dismiss after the specified duration
+  setTimeout(() => {
+    dismiss();
+  }, duration);
+
 
   return {
     id: id,
@@ -176,7 +191,7 @@ function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
-    const currentSetState = setState; // Capture for cleanup
+    const currentSetState = setState;
     listeners.push(currentSetState)
     return () => {
       const index = listeners.indexOf(currentSetState)
@@ -184,7 +199,7 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, []) // Changed dependency array to empty
+  }, [])
 
   return {
     ...state,
