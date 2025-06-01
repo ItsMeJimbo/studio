@@ -79,8 +79,8 @@ export default function ConfessEaseApp() {
           if (permission === 'granted') {
             console.log('Notification permission granted.');
             
-            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg';
-            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') {
+            const vapidKey = 'BMc79LF6g-vFCnlKurXwowdO_5JSoVj9RH_54Mvw49f7F-sN9XX4ZGShu9CZxLoweL4jC_JQ_hzxmiBpGn9ceCg'; // VAPID key is set
+            if (vapidKey === 'YOUR_VAPID_KEY_HERE_PLACEHOLDER_DO_NOT_USE') { // Check for placeholder
                 console.error("FCM VAPID Key is a placeholder. Please set your actual VAPID Key in ConfessEaseApp.tsx to enable push notifications.");
                 toast({
                     title: "Push Notification Error",
@@ -509,3 +509,5 @@ export default function ConfessEaseApp() {
     </div>
   );
 }
+
+    
