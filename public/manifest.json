@@ -1,57 +1,63 @@
 {
-  "name": "My Catholic App",
-  "short_name": "CatholicApp",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "orientation": "portrait",
+  "name": "ConfessEase",
+  "short_name": "ConfessEase",
+  "description": "A private app for Catholic confession preparation and reflection.",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-maskable-512x512.png",
+      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/icon-maskable-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/icons/512x512-monochrome.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "monochrome"
     }
   ],
+  "screenshots": [
+    {
+      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/screenshots/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Home Screen"
+    },
+    {
+      "src": "https://studio--inner-peace-w9a7l.us-central1.hosted.app/screenshots/screenshot2-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "Examination Guide"
+    }
+  ],
+  "start_url": "/",
   "id": "/",
   "scope": "/",
-  "launch_handler": {
-    "client_mode": "focus-existing"
-  },
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F5DC",
+  "theme_color": "#77B5FE",
   "categories": [
     "lifestyle",
     "utilities",
-    "education",
-    "religion"
+    "personalization"
   ],
-  "description": "A private app for Catholic confession preparation and reflection.",
   "dir": "ltr",
   "lang": "en",
   "prefer_related_applications": false,
-  "screenshots": [
-    {
-      "src": "/screenshots/screenshot1.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "label": "Main screen showing sin selection and current list."
-    },
-    {
-      "src": "/screenshots/screenshot2-wide.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Examination of Conscience guide on a wider screen."
-    }
-  ]
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }
